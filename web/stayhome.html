@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stay Home — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<script type="importmap">{ "imports": { "three": "/vendor/three/build/three.module.js" } }</script>
+<style>
+  html,body{height:100%;overflow:hidden}
+  #stage{position:fixed;top:var(--nav);left:0;right:0;bottom:0}
+  #loading{position:fixed;inset:var(--nav) 0 0 0;display:grid;place-items:center;z-index:5;color:var(--mute);font:700 12px var(--mono);letter-spacing:3px}
+  .glass{background:rgba(20,13,16,.86);border:1px solid var(--line2);box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+  #head{position:fixed;top:calc(var(--nav) + 12px);left:50%;transform:translateX(-50%);z-index:20;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:min(760px,96vw)}
+  #head h1{margin:0;font:700 12px var(--mono);letter-spacing:5px;color:var(--ink2);text-transform:uppercase;text-align:center}
+  #head h1 b{color:var(--accent3)}
+  .slider{display:flex;align-items:center;gap:4px;border-radius:99px;padding:4px;pointer-events:auto}
+  .slider button{width:34px;height:34px;border-radius:50%;border:0;background:transparent;cursor:pointer;color:var(--ink2);display:grid;place-items:center}
+  .slider button:hover{background:rgba(255,255,255,.07)}
+  .slider .lbl{min-width:230px;text-align:center;font:700 12px var(--mono);letter-spacing:1px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slider .lbl small{display:block;font:600 10px 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:.3px;color:var(--mute)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:auto}
+  .chip{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:99px;color:var(--ink2)}
+  .chip b{font-family:var(--mono);color:#fff}
+  .chip.zero{opacity:.45}
+  #banner{position:fixed;top:calc(var(--nav) + 128px);left:50%;transform:translateX(-50%);z-index:21;background:var(--grad);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;box-shadow:var(--shadow2);max-width:92vw;text-align:center;font-size:13px;display:none}
+  #banner.on{display:block;animation:bIn .45s cubic-bezier(.2,.9,.3,1.2)}
+  #banner button{margin-left:8px}
+  @keyframes bIn{from{opacity:0;transform:translateX(-50%) translateY(-16px)}}
+  #clockbox{position:fixed;left:16px;top:calc(var(--nav) + 12px);z-index:21;border-radius:16px;padding:12px 14px;width:236px}
+  #clockbox .t{font:800 26px var(--mono);line-height:1}
+  #clockbox .d{font:600 11px var(--mono);color:var(--mute);margin-top:4px}
+  #clockbox .ph{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+  #clockbox .ph.closed{border-color:rgba(226,80,95,.5);color:#ffb4bd}
+  #clockbox h5{margin:12px 0 6px;font:700 10px var(--mono);letter-spacing:2px;color:var(--mute)}
+  .seg{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .seg button{flex:1;border:0;background:none;padding:5px 0;border-radius:7px;font:700 11px var(--mono);cursor:pointer;color:var(--ink2)}
+  .seg button.on{background:var(--grad);color:#fff}
+  .jumps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  .jumps button{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:5px 0;font:700 10.5px var(--mono);color:var(--ink2);cursor:pointer}
+  .jumps button:hover{border-color:var(--accent2);color:#fff}
+  .hours{font-size:11px;color:var(--mute);margin-top:8px;line-height:1.55}
+  .hours b{color:var(--ink2);font-family:var(--mono)}
+  #rooms{position:fixed;right:16px;top:calc(var(--nav) + 12px);bottom:16px;z-index:20;width:300px;border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+  #rooms h4{margin:0;padding:12px 14px;font:700 10.5px var(--mono);letter-spacing:2px;color:var(--mute);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  #rooms .list{overflow:auto;padding:8px;flex:1}
+  .rm{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:border-color .2s,background .2s}
+  .rm:hover,.rm.on{border-color:var(--accent2);background:rgba(201,68,106,.08)}
+  .rm .rt{font:700 10px var(--mono);letter-spacing:1.6px;color:var(--accent3);margin-bottom:6px;display:flex;justify-content:space-between}
+  .rm .rt span{color:var(--mute);letter-spacing:.5px}
+  .ag{display:flex;gap:8px;align-items:center;padding:3px 0}
+  .ag .n{font-size:12.5px;font-weight:700;line-height:1.2}
+  .ag .a{font-size:11px;color:var(--mute);display:flex;gap:5px;align-items:center}
+  .ag .a.sleep{color:#9fb0ff}.ag .a.office{color:var(--gold)}
+  .o3d-label.step.zzz{background:rgba(40,48,92,.88);border-color:rgba(159,176,255,.4);color:#c9d3ff;animation:zz 2.4s ease-in-out infinite}
+  .o3d-label.step.zzz b{color:#c9d3ff}
+  @keyframes zz{0%,100%{opacity:.55;margin-top:0}50%{opacity:1;margin-top:-6px}}
+  .help{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:19;font-size:11px;color:var(--mute);background:rgba(20,13,16,.8);padding:4px 12px;border-radius:99px;border:1px solid var(--line)}
+  @media (max-width:1100px){#rooms{display:none}.help{display:none}}
+  @media (max-width:760px){#clockbox{top:auto;bottom:12px;left:12px;width:200px}#clockbox .jumps,#clockbox .hours,#clockbox h5{display:none}.chips{display:none}}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div id="stage"></div>
+<div id="loading">MEMUAT RUMAH…</div>
+<div id="head">
+  <h1>Stay Home · <b>Rumah Agen</b> SWEET</h1>
+  <div class="slider glass"><button id="prev" title="Sebelumnya (←)"></button><div class="lbl" id="vlabel">Seluruh rumah</div><button id="next" title="Berikutnya (→)"></button></div>
+  <div class="chips" id="chips"></div>
+</div>
+<div id="banner"></div>
+<div id="clockbox" class="glass">
+  <div class="t" id="ct">--:--</div><div class="d" id="cd">—</div><div class="ph" id="cph">—</div>
+  <h5>TIMELAPSE</h5>
+  <div class="seg" id="speeds"></div>
+  <h5>LOMPAT KE JAM</h5>
+  <div class="jumps" id="jumps"></div>
+  <div class="hours"><b>05:00–19:00</b> jam kerja di kantor<br><b>19:30</b> pulang ke Stay Home<br><b>20:00–04:00</b> kantor tutup — tidak ada cetak resi &amp; pesanan</div>
+</div>
+<aside id="rooms" class="glass"><h4>KAMAR AGEN <span>1 kamar · 1 kasur · 2 agen</span></h4><div class="list" id="rlist"></div></aside>
+<div class="help">Geser = pindah • Scroll = zoom • ← → = ganti ruangan • Klik kamar / agen = fokus</div>
+
+<script src="/shared.js"></script>
+<script type="module">
+import { createHome } from '/js/home3d.js';
+const S = window.SWEET;
+S.nav('stayhome');
+const $ = (id) => document.getElementById(id);
+const I = S.icon;
+$('prev').innerHTML = I('play', 14).replace('<path', '<path transform="rotate(180 12 12)"'); $('next').innerHTML = I('play', 14);
+const ACT_ICON = { tidur: 'bed', santai: 'user', ngopi: 'coffee', belajar: 'book', baca: 'book', nonton: 'tv', main: 'game', ngobrol: 'users', jalan: 'walk', lembur: 'office' };
+const ACT_ORDER = ['tidur', 'ngopi', 'ngobrol', 'nonton', 'main', 'belajar', 'baca', 'santai', 'jalan'];
+let home, views = [], viewIdx = 0, snap = null, sel = null;
+
+try {
+  home = await createHome($('stage'), {
+    onView: (v) => { viewIdx = home ? home.views.indexOf(v) : 0; $('vlabel').innerHTML = `${S.esc(v.label)}<small>${v.room !== undefined ? roomSub(v.room) : 'Tempat agen istirahat di luar jam kerja'}</small>`; renderRooms(); },
+    onAgentClick: (key) => { sel = key; home.select(key); const a = snap && snap.agents.find((x) => x.key === key); if (a) { const v = home.views.find((x) => x.room === a.room); if (v) go(home.views.indexOf(v)); } }
+  });
+  $('loading').remove();
+} catch (e) { $('loading').innerHTML = `Gagal memuat Stay Home<br><small style="letter-spacing:0">${S.esc(e.message)}</small>`; throw e; }
+views = home.views;
+function go(i) { viewIdx = (i + views.length) % views.length; home.focus(views[viewIdx].id); history.replaceState(null, '', '#' + views[viewIdx].id); }
+$('prev').onclick = () => go(viewIdx - 1); $('next').onclick = () => go(viewIdx + 1);
+addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') go(viewIdx - 1); if (e.key === 'ArrowRight') go(viewIdx + 1); });
+if (location.hash) { const i = views.findIndex((v) => v.id === location.hash.slice(1)); if (i >= 0) go(i); }
+
+function roomSub(r) { const ag = snap ? snap.agents.filter((a) => a.room === r) : []; return ag.length ? ag.map((a) => S.esc(a.name)).join(' & ') : 'Kamar kosong'; }
+function actText(a) {
+  if (!snap || !snap.active) return { cls: 'office', icon: 'office', text: 'Di kantor' };
+  const h = a.home; if (!h) return { cls: '', icon: 'clock', text: 'Dalam perjalanan' };
+  return { cls: h.act === 'tidur' ? 'sleep' : h.act === 'lembur' ? 'office' : '', icon: ACT_ICON[h.act] || 'user', text: h.label || h.act };
+}
+function renderRooms() {
+  if (!snap) return;
+  const cur = views[viewIdx] && views[viewIdx].room;
+  $('rlist').innerHTML = snap.rooms.map((r, i) => {
+    const ag = snap.agents.filter((a) => a.room === i).sort((a, b) => a.side - b.side);
+    const sleeping = ag.filter((a) => a.home && a.home.act === 'tidur').length;
+    return `<div class="rm ${cur === i ? 'on' : ''}" data-r="${i}"><div class="rt">KAMAR ${i + 1}<span>${ag.length ? (sleeping === ag.length && snap.active ? 'lampu mati' : `${ag.length} penghuni`) : 'kosong'}</span></div>
+      ${ag.map((a) => { const t = actText(a); return `<div class="ag">${S.avatar(a, 28)}<div><div class="n">${S.esc(a.name)}</div><div class="a ${t.cls}">${I(t.icon, 12)} ${S.esc(t.text)}</div></div></div>`; }).join('') || '<div class="ag"><div class="a">Belum ada penghuni</div></div>'}</div>`;
+  }).join('');
+}
+$('rlist').onclick = (e) => { const r = e.target.closest('[data-r]'); if (!r) return; const v = views.find((x) => x.room === Number(r.dataset.r)); if (v) go(views.indexOf(v)); };
+function renderChips() {
+  if (!snap) return;
+  $('chips').innerHTML = ACT_ORDER.map((k) => { const n = snap.counts[k] || 0; return `<span class="chip glass ${n ? '' : 'zero'}">${I(ACT_ICON[k], 13)} ${S.esc(snap.labels[k] || k)} <b>${n}</b></span>`; }).join('');
+}
+function renderBanner() {
+  const b = $('banner'), c = S.clk || {};
+  if (snap && !snap.active) {
+    const msg = c.phase === 'pulang' ? 'Agen sedang dalam perjalanan pulang ke Stay Home…' : c.phase === 'laporan' ? 'Agen sedang membuat laporan harian di kantor. Pulang jam 19:30.' : 'Agen sedang bekerja di kantor (jam kerja 05:00–19:00). Rumah kosong sampai 19:30.';
+    b.innerHTML = `${I('office', 15)} ${msg}<button class="btn sm ghost" data-j="20:30">Lompat ke malam</button><a class="btn sm ghost" href="/office" style="margin-left:6px">Lihat kantor</a>`;
+    b.classList.add('on');
+  } else b.classList.remove('on');
+}
+$('banner').onclick = async (e) => { const j = e.target.closest('[data-j]'); if (!j) return; try { renderClock(await S.api('/api/clock', { body: { jump: j.dataset.j } })); } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); } };
+
+async function refresh() { try { snap = await S.api('/api/home'); renderChips(); renderRooms(); renderBanner(); const v = views[viewIdx]; if (v && v.room !== undefined) $('vlabel').innerHTML = `${S.esc(v.label)}<small>${roomSub(v.room)}</small>`; } catch (_) {} }
+let rt; const soon = () => { clearTimeout(rt); rt = setTimeout(refresh, 400); };
+S.on('agent', (d) => { if ('home' in d) soon(); });
+S.on('office', soon); S.on('roster', soon);
+await refresh(); setInterval(refresh, 10000);
+
+// ---------- Jam & timelapse ----------
+const PH_ICON = { malam: 'moon', datang: 'users', kerja: 'office', istirahat: 'clock', laporan: 'file', pulang: 'home' };
+function tick() {
+  $('ct').textContent = S.simTime(true);
+  const c = S.clk;
+  if (c) $('cd').textContent = `${new Date(S.simNow() + 7 * 3600e3).toISOString().slice(0, 10)} • ${c.speed === 1 ? 'waktu nyata' : 'timelapse ' + c.speed + 'x'}`;
+  requestAnimationFrame(tick);
+}
+tick();
+function renderClock(c) {
+  if (!c) return;
+  $('cph').innerHTML = `${I(PH_ICON[c.phase] || 'clock', 13)} ${S.esc(c.label)}`;
+  $('cph').classList.toggle('closed', !!c.closed);
+  $('speeds').innerHTML = (c.speeds || [1, 60, 300, 900]).map((v) => `<button data-sp="${v}" class="${c.speed === v ? 'on' : ''}">${v === 1 ? 'REAL' : v + 'x'}</button>`).join('');
+  renderBanner();
+}
+$('jumps').innerHTML = [['19:35', 'Pulang'], ['21:00', 'Malam'], ['23:30', 'Tidur'], ['04:00', 'Subuh']].map(([t, l]) => `<button data-j="${t}" title="Lompat ke ${t}">${l}</button>`).join('');
+$('speeds').onclick = async (e) => { const b = e.target.closest('[data-sp]'); if (!b) return; try { renderClock(await S.api('/api/clock', { body: { speed: Number(b.dataset.sp) } })); } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); } };
+$('jumps').onclick = async (e) => { const b = e.target.closest('[data-j]'); if (!b) return; try { renderClock(await S.api('/api/clock', { body: { jump: b.dataset.j } })); } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); } };
+S.on('clock', renderClock);
+renderClock(await S.api('/api/clock'));
+</script>
+</body>
+</html>

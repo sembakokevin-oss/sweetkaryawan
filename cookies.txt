@@ -1,0 +1,44 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.lazada.co.id	TRUE	/	FALSE	1810930574	lzd_cid	7f051383-4550-4946-b4bb-0abb4156908a
+.lazada.co.id	TRUE	/	FALSE	1810930574	t_uid	7f051383-4550-4946-b4bb-0abb4156908a
+.lazada.co.id	TRUE	/	FALSE	1810291844	lwrid	AgGeTC53SPnq25slMCvPX39uI03r
+.lazada.co.id	TRUE	/	TRUE	1813954574	t_fv	1779394574242
+.lazada.co.id	TRUE	/	TRUE	1813954575	cna	DVaWIr1Ve1YCAXIF3ebc8e9K
+.lazada.co.id	TRUE	/	TRUE	1829300113	_lang	id_ID
+.sellercenter.lazada.co.id	TRUE	/	FALSE	1829299844	G_ENABLED_IDPS	google
+.lazada.co.id	TRUE	/	TRUE	1811561786	lzd_login_lastlogintype	GOOGLE
+sellercenter.lazada.co.id	FALSE	/	TRUE	1810292123	__itrace_wid	dd9af19a-159f-4146-12b5-1319cfd67918
+.sellercenter.lazada.co.id	TRUE	/	FALSE	1806420660	token	ffd8315d87c742f689a5f958393cfd99
+.lazada.co.id	TRUE	/	FALSE	1815297998	_ga	GA1.3.1373471305.1780724027
+.lazada.co.id	TRUE	/	FALSE	1815297998	_ga_44FMGEPY40	GS2.3.s1780737998$o3$g1$t1780737998$j60$l0$h0
+.lazada.co.id	TRUE	/	FALSE	1814433998	_uetvid	691d907058c711f18cb25700955e8a43
+.lazada.co.id	TRUE	/	FALSE	1815298020	AMCV_126E248D54200F960A4C98C6%40AdobeOrg	-1124106680%7CMCIDTS%7C20611%7CvVersion%7C5.2.0%7CMCMID%7C53423758436367191392970254372755537665%7CMCOPTOUT-1780745219s%7CNONE
+.lazada.co.id	TRUE	/	TRUE	1794911985	xlly_s	1
+.lazada.co.id	TRUE	/	FALSE	1797245136	hng	ID|id-ID|IDR|360
+.lazada.co.id	TRUE	/	FALSE	1797245136	hng.sig	to18pG508Hzz7EPB_okhuQu8kDUP3TDmLlnu4IbIOY8
+sellercenter.lazada.co.id	FALSE	/	TRUE	1794826528	c_csrf	WYGs42eEBYYQLl4ma2glF8WX
+.lazada.co.id	TRUE	/	TRUE	0	JSID	1fe766d4a199b0bbb953f2687473a829
+.lazada.co.id	TRUE	/	TRUE	0	TID	babc9158cde90e879d8e9037d5a3eeea
+.lazada.co.id	TRUE	/	TRUE	0	CSRFT	ef53e01e3e10d
+.lazada.co.id	TRUE	/	TRUE	1794741922	t_sid	sJZbNsmJCMrB9UQk8vJfHMiJpqwBTRFl
+.lazada.co.id	TRUE	/	TRUE	1794741922	utm_channel	NA
+.lazada.co.id	TRUE	/	FALSE	1810291840	lwrtk	AAIEavn+/zSLDVs9SvZCOKWt3jBwk5133rm7/PPeNnL7uOZlrSfsacg=
+.lazada.co.id	TRUE	/	TRUE	0	lzd_sid	18aa19d7e310e9211a84ae14fd62a8cf
+.lazada.co.id	TRUE	/	TRUE	0	_tb_token_	7eae86e4ed573
+.lazada.co.id	TRUE	/	TRUE	1795344642	_m_h5_tk	305dba0514290c5a32e98d82e6276fa3_1794748481974
+.lazada.co.id	TRUE	/	TRUE	1795344642	_m_h5_tk_enc	48cb7920d5de7c683b3372b03e53c94a
+.lazada.co.id	TRUE	/	TRUE	1794826528	asc_uid	403644416127
+.lazada.co.id	TRUE	/	TRUE	1794826528	asc_uid.sig	f4rg2yaBLAcv3cRe_S4o1E2tOFIVhW02N0sk8PV1Vic
+.lazada.co.id	TRUE	/	TRUE	1794826528	asc_uid_enc	NDAzNjQ0NDE2MTI3
+.lazada.co.id	TRUE	/	TRUE	1794826528	asc_uid_enc.sig	OvHBgPhHjxM9xYXEB3Wwhpzb9TlmTlqcLxwO2z-Fx04
+.lazada.co.id	TRUE	/	TRUE	0	asc_seller_mp_type	ASC_V2
+sellercenter.lazada.co.id	FALSE	/	TRUE	1794826246	EGG_SESS	yr7iv-rzzjuwzrPSxS35NTktFOajfIHGSuK89HVUIahPesk4y8ZXy8OnDUDEtgmdXA-1hJRLmf70NatNyfpiwk7xPesWfEkFSOg0YpeZMypsLIZeRoDEkvuB9zCCMjEU1h-vRcl8vy8orCwEjfIKaRLI3bUsytwD-6aAKwUKLmmmPuIWsBRwV4vUcQm8pHv7eBlVIoQ2rx35M-EZXep_oZdC9jm6odOfFbCGi4Il2YCcVdBEIsURLuAYNcvxIGL5RXh8aekW7NdnRuE9zXO4RYs6TA9lwfO90hEVrBLWiAIQjfaCwiAelSSS8ZFlRkBUr-i6xSQrgu4SrZVjv6PY6xCjwcgMl2F4aw7kL7RSgHW1AXhadfvgDxufDZi_5iIeBWAnhe-w4ZxZNO2VeGmIlk1eTcpOky0nFBQniQt_Ylw=
+.lazada.co.id	TRUE	/	FALSE	1810291846	epssw	14*mE_vsDrDDyOiAa8S1lqxpa8XauDZVo8EiokrNlN5ol4GD68oi1PGNWELinODvWDDa3lvsvIGVowZQ1uSDzSxn3CYDDkDDz9QDs3FQYFbL5gErpJM7H4YBGoN57lhYKEqsruzv8u4wwbZkhp_gDS4t8TMWAPXAFQsl8vE-WdUJA7szRUDByA5YWDDYHrSDnPjhHYMt8Jt51zziDVSKGA-gCcUA7cMDD-DDG82BOzG2nDKA7_QwTe7YJtDG9pspzfPMnyrMIfP1WVov_jV7jjSIWdquLHp2XyRIG4XwiNpZSpW1XKXP0DypwuMYxQEMz-CDDDC04bxMKiLvWjXEKqL-WjxsUC-i_QNb_u-6RxIc0ukLWu-PyiHFD..
+sellercenter.lazada.co.id	FALSE	/	FALSE	0	JSESSIONID	F85C47B472FDAD3E3B5CBA4D36D7AECF
+sellercenter.lazada.co.id	FALSE	/	FALSE	1810292028	_bl_uid	XOmtewmRhjFpX9vvFgU2tmve6g5e
+.lazada.co.id	TRUE	/	TRUE	1810292122	isg	BJOTzF5a_UNep7HhXe6iniWRIhe9SCcKX2GFlkWwxLLpxLNmzR7PWvHW-iyq5H8C
+.lazada.co.id	TRUE	/	TRUE	1810292122	tfstk	g5bnmaZAPM-IGPkaoY8QecHjk1r9JeTWNT3JeUpzbdJsJMBRe4xPUtx-yWtRj7XR9W_8A_JlEdXhyprBy_JyQ_RJp8OpEQJNQ63peajsrs15JWT8Oe1BPUyYHrplO6T5SZPrLRCaaQTkTUO8xM1BPUyt64rYo66ntdYw4UPM7QRJaU-ezVRwCQDyUTJebARDGUJPUTkw_IRjU48y4CPMNdJyzUWP_5AJQL8yzT5ZNf3yna717kuj_PzP7Q_MtHvVsPgrrt3vxK5eI4yVSBXW36Jiz4JXQdrhs6enl1LCotAApPuhns_1ICW4rRY5CgWyZOzjeesAdZtG1ouN6evw0g-gTy5M-pxASncqjejPdaxCxbNf_eW1cKtUfROGJZKkhhDaL1CMLnjlpRgypifNInQtBqL5CgWyZOkh4AoZ0KumPCPR70iWYCOMHUNtreM3Nj24s5mbAHR69-Fgs0iWYCOMC5Vicu-e1BQ1.
+sellercenter.lazada.co.id	FALSE	/	TRUE	1795578631	arms_uid	0af226f2-09a5-4e78-9da8-bb7e2469a30a

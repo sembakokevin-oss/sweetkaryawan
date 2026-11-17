@@ -1,0 +1,49 @@
+# SWEET AI Agent Office (SweetOffice.com) — Spesifikasi v3.1
+
+## Brand & pemilik
+SWEET AI Agent Office • SweetOffice.com • Bos perusahaan: Kevin
+
+## Prinsip
+1 Agent = 1 Kerjaan. Setiap agen punya ruangan sendiri dengan furnitur & animasi sesuai kerjaannya.
+
+## Agen
+Tim Produk & Engineering:
+ #1 Kamala  Product Manager   — pecah ide jadi daftar fitur (Login, Chat, Payment, Profile, Notif)       [papan kanban]
+ #2 Indra   Product Architect — data/, domain/, presentation/, lib/                                     [meja blueprint, rak folder]
+ #3 Nadine  UI/UX Designer    — alur & tampilan tiap alur                                               [easel, swatch warna]
+ #4 Felix   Mobile Developer  — ikut kontrak API yang sama                                              [ponsel raksasa, rak device]
+ #5 Norman  Backend Developer — kontrak API + server                                                    [server rack LED]
+ #6 Nola    Database Engineer — tabel tanpa data dobel                                                  [tumpukan database menyala]
+ #7 Wucing  QA Engineer       — cari bug sampai ketemu                                                  [papan bug berdenyut]
+ #8 Raka    Security Engineer — cek celah sebelum orang lain                                            [brankas, perisai, CCTV]
+ #9 Robo    DevOps Engineer   — build & deploy                                                          [roket menyala saat deploy]
+ #10 Chelsea Tech Lead        — review semua, yang jelek dikembalikan                                   [rak buku, stempel]
+Tim Toko Lazada: #11 Sari CS, #12 Dimas Order & Resi, #13 Bayu Stok & Harga, #14 Mira Iklan, #15 Tomi Analis.
+
+## Halaman web
+/ (Beranda) • /office (kantor 3D, navbar, slide "‹ Seluruh kantor ›") • /ruangan (slide ruang agen) • /dashboard (lengkap)
+Notifikasi: jatuh dari atas → memantul → jatuh & menghilang, bunyi, konfeti saat checkout.
+
+## Alur
+- Proyek: ide → PM → Arsitek → Desainer → Kontrak API → Mobile+Backend (paralel) → DB → QA → Security → DevOps → Review Tech Lead (maks 3 putaran).
+- Rapat: /rapat → agen jalan ke Ruang Rapat, melapor bergiliran (balon bicara), notulen tersimpan; /bubar → kesimpulan + action item langsung dikerjakan.
+- Istirahat: /istirahat → agen ke Lounge; /kerja → kembali.
+- Iklan: Mira membuat proposal → Kevin tekan Terima (web/Telegram) → langsung jalan.
+- Checkout Lazada → tersimpan (pembeli, total, item, status, resi) → notifikasi web + Telegram → pendapatan.
+- Lynk.id: input manual / impor CSV / webhook.
+- Kerja otomatis: agen idle mengerjakan rutinitas berbasis data nyata.
+
+## AI
+Claude (utama, tool use) → Gemini → Hermes. Konfigurasi di .env.
+
+## Database
+SQLite data/sweet.db: orders, income, products, ads, tasks, activity, projects, deliverables, meetings, meeting_notes, commands, notifications, recruits, kv.
+
+## v3.1
+- Tema website hitam gradasi burgundy, ikon SVG, emoji hanya untuk notifikasi penting.
+- Kantor 3D: ruangan bersebelahan tapi terpisah (rekrutan di bilik terpisah), PC/monitor/kursi gaming + printer resi tiap meja.
+- Alur kerja meja: jam tugas -> memantau PC -> cek toko Lazada -> print resi -> cek promosi ($) -> print resi (masuk dashboard) -> menunggu keputusan (!) -> meja berkedip -> 17:00 laporan harian (masuk dashboard).
+- Jam kantor + timelapse, jam dinding analog berputar, siang/malam (malam gelap + lampu menyala), agen pulang malam hari.
+- Nominal uang tampil di kantor (papan pendapatan, uang melayang saat checkout).
+- Upload cookies.txt Seller Center dari dashboard.
+- Folder scripts/: setup, start/stop, check, export CSV, import cookies, reset demo, autostart.

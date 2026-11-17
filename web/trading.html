@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trading Terminal — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .wrap{max-width:1320px;margin:0 auto;padding:calc(var(--nav) + 28px) 16px 60px}
+  .eyebrow{display:flex;gap:7px;align-items:center;font:800 11px var(--mono);letter-spacing:1.6px;color:var(--gold);text-transform:uppercase}
+  .hero{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+  .hero h1{margin:8px 0 6px;font-size:clamp(28px,4.4vw,44px);letter-spacing:-1.2px;line-height:1.05}
+  .hero p{margin:0;color:var(--ink2);max-width:640px}
+  .sync{display:inline-flex;gap:8px;align-items:center;font:600 11.5px var(--mono);color:var(--ink2);border:1px solid var(--line2);border-radius:99px;padding:6px 12px;background:rgba(255,255,255,.03)}
+  .sync i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(63,179,127,.25)}
+  .sync.sim i{background:var(--gold);box-shadow:0 0 0 3px rgba(214,178,110,.25)}
+  .banner{border-radius:14px;padding:12px 16px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.55}
+  .banner.sim{background:rgba(214,178,110,.08);border:1px solid rgba(214,178,110,.35);color:#ecd9b0}
+  .banner.live{background:rgba(63,179,127,.08);border:1px solid rgba(63,179,127,.35);color:#bfe9d3}
+  .banner.stop{background:rgba(226,80,95,.1);border:1px solid rgba(226,80,95,.45);color:#f6c3c9}
+  .banner b{color:#fff}.banner code{font:600 12px var(--mono);background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
+  .banner ol{margin:6px 0 0;padding-left:18px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{padding:18px;position:relative;min-width:0}
+  .kpi h5{margin:0 0 14px;font:800 10.5px var(--mono);letter-spacing:1.4px;color:var(--mute);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+  .kpi h5 span{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--ink2)}
+  .kpi .v{font:800 28px var(--mono);letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .s{font:600 11.5px var(--mono);color:var(--mute);margin-top:3px}
+  .kpi .chips{display:flex;gap:6px;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .pill{display:inline-flex;gap:5px;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--ink2)}
+  .pos{color:var(--green)!important}.neg{color:var(--red)!important}
+  .ret{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center}
+  .ret small{display:block;font:700 9.5px var(--mono);color:var(--mute);letter-spacing:.6px}
+  .ret b{font:800 14px var(--mono)}
+  .card.pad{padding:20px}
+  .chead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .chead h3{margin:0;font-size:15px;display:flex;gap:8px;align-items:center}
+  .chead h3 .ic{color:var(--gold)}
+  .seg{display:flex;gap:2px;background:rgba(255,255,255,.03);border:1px solid var(--line2);border-radius:99px;padding:3px;flex-wrap:wrap}
+  .seg button{border:0;background:none;color:var(--ink2);font:700 11.5px 'Plus Jakarta Sans',sans-serif;padding:5px 12px;border-radius:99px;cursor:pointer;display:flex;gap:5px;align-items:center}
+  .seg button.on{background:rgba(214,178,110,.15);color:#f0d9a5;box-shadow:inset 0 0 0 1px rgba(214,178,110,.45)}
+  .cstats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:8px}
+  .cstats small{display:block;font:800 9.5px var(--mono);letter-spacing:1px;color:var(--mute);text-transform:uppercase}
+  .cstats b{font:800 19px var(--mono)}
+  #chart{width:100%;height:320px;position:relative}
+  #chart svg{width:100%;height:100%;display:block;overflow:visible}
+  #chart .tip{position:absolute;pointer-events:none;background:rgba(14,9,11,.95);border:1px solid var(--line2);border-radius:9px;padding:6px 9px;font:600 11.5px var(--mono);white-space:nowrap;transform:translate(-50%,-115%);display:none;z-index:2}
+  .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin:16px 0}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal .h{font:800 9.5px var(--mono);color:var(--mute);text-align:center;padding:4px 0;letter-spacing:1px}
+  .cal .d{min-height:54px;border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 11px var(--mono);color:var(--ink2);background:rgba(255,255,255,.015);gap:2px}
+  .cal .d small{font:700 10px var(--mono);color:var(--mute)}
+  .cal .d.p{background:rgba(63,179,127,.12);border-color:rgba(63,179,127,.45)}.cal .d.p small{color:#86dcb2}
+  .cal .d.n{background:rgba(226,80,95,.12);border-color:rgba(226,80,95,.45)}.cal .d.n small{color:#f19aa4}
+  .cal .d.today{box-shadow:inset 0 0 0 1px var(--gold)}
+  .calnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .calnav div{text-align:center}.calnav b{display:block}.calnav span{font:700 12px var(--mono)}
+  .donut{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;min-height:240px}
+  .legend{flex:1;min-width:200px;display:flex;flex-direction:column;gap:12px}
+  .legend .r{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:700;border-bottom:2px solid var(--c);padding-bottom:6px}
+  .legend .r i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:7px}
+  .legend .r span{font-family:var(--mono);color:var(--ink2)}
+  .agentc{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+  .ag{display:flex;gap:14px;align-items:center}
+  .ag h4{margin:0;font-size:17px}.ag .role{color:var(--ink2);font-size:12.5px;font-weight:700}
+  .note{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(214,178,110,.07);border:1px solid rgba(214,178,110,.25);font-size:13px}
+  .note small{display:block;font:800 9.5px var(--mono);letter-spacing:1.2px;color:var(--gold);margin-bottom:3px}
+  .ind{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:12px}
+  .ind div{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .ind small{display:block;font:800 9.5px var(--mono);color:var(--mute);letter-spacing:.8px}
+  .ind b{font:800 14px var(--mono)}
+  .flags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .lflag{display:inline-flex;gap:7px;align-items:center;padding:6px 11px;border-radius:9px;font:800 11.5px var(--mono);letter-spacing:.6px;color:#fff}
+  .lflag.buy{background:linear-gradient(180deg,#1f9d5c,#127042)}.lflag.sell{background:linear-gradient(180deg,#d13a4f,#8d1424)}.lflag.posn{background:linear-gradient(180deg,#b88a2e,#7a5a14)}
+  .acct{font-size:13px}
+  .acct .r{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line2)}
+  .acct .r span{color:var(--mute)}.acct .r b{font-family:var(--mono);text-align:right;word-break:break-all}
+  .ctl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .ctl label{font-size:11px;font-weight:700;color:var(--mute);display:flex;flex-direction:column;gap:4px}
+  .ctl input,.ctl select{padding:7px 10px;font:600 13px var(--mono)}
+  .sw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;font-size:13px;font-weight:700}
+  .sw input{width:auto;transform:scale(1.25)}
+  .tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+  .tabs button{flex:1;min-width:150px;border:0;background:none;color:var(--ink2);font:700 13px 'Plus Jakarta Sans',sans-serif;padding:14px 10px;cursor:pointer;display:flex;gap:7px;align-items:center;justify-content:center;border-bottom:2px solid transparent}
+  .tabs button.on{color:#fff;border-bottom-color:var(--gold);background:rgba(214,178,110,.05)}
+  .tabs .cnt{background:var(--gold);color:#1b130a;border-radius:99px;padding:0 7px;font:800 10.5px var(--mono)}
+  .tbl{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+  th{font:800 10px var(--mono);letter-spacing:1px;color:var(--mute);text-transform:uppercase;text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td.m{font-family:var(--mono)}
+  .side{font:800 10.5px var(--mono);padding:2px 8px;border-radius:6px}
+  .side.b{background:rgba(63,179,127,.15);color:#86dcb2}.side.s{background:rgba(226,80,95,.15);color:#f19aa4}
+  .empty2{text-align:center;padding:46px 14px;color:var(--mute)}
+  .empty2 .ic{width:34px;height:34px;color:var(--mute)}
+  .tfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;font:600 11.5px var(--mono);color:var(--ink2)}
+  .journal{display:flex;flex-direction:column;max-height:420px;overflow:auto}
+  .journal .j{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .journal .j em{font-style:normal;font:800 9.5px var(--mono);letter-spacing:.8px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.05);color:var(--ink2);height:fit-content;text-transform:uppercase}
+  .journal .j em.order{background:rgba(214,178,110,.15);color:#f0d9a5}.journal .j em.isi{background:rgba(91,141,239,.15);color:#a9c3f7}
+  .journal .j em.tutup{background:rgba(63,179,127,.15);color:#86dcb2}.journal .j em.risiko,.journal .j em.error{background:rgba(226,80,95,.15);color:#f19aa4}
+  .journal .j small{display:block;color:var(--mute);font:600 10.5px var(--mono)}
+
+  .live{padding:0;overflow:hidden;margin-bottom:16px}
+  .lhead{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .tick{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .tick .sym{font:800 13px var(--mono);letter-spacing:1px;color:var(--gold);display:flex;align-items:center;gap:7px}
+  .tick .sym i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(63,179,127,.6);animation:livePulse 1.6s infinite}
+  .tick .sym i.sim{background:var(--gold);box-shadow:0 0 0 0 rgba(214,178,110,.6)}
+  @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(63,179,127,.55)}100%{box-shadow:0 0 0 10px rgba(63,179,127,0)}}
+  .tick .px{font:800 34px var(--mono);letter-spacing:-.5px;transition:color .25s}
+  .tick .px.up{color:#4ade80}.tick .px.dn{color:#f87171}
+  .tick .chg{font:700 13px var(--mono)}
+  .tick .ba{font:600 12px var(--mono);color:var(--ink2)}
+  .src{font:600 11px var(--mono);color:var(--mute);padding:0 20px 10px}
+  #cc{position:relative;height:440px;cursor:crosshair;touch-action:none}
+  #cc canvas{position:absolute;inset:0;width:100%;height:100%}
+  #ohlc{position:absolute;left:12px;top:8px;font:600 11.5px var(--mono);color:var(--ink2);pointer-events:none;z-index:2;background:rgba(10,7,8,.6);padding:3px 8px;border-radius:6px}
+  .learn{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;padding:16px 20px;border-top:1px solid var(--line)}
+  .learn .big{font:800 30px var(--mono)}.learn small{display:block;font:800 9.5px var(--mono);letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-bottom:4px}
+  .learn .lesson{margin-top:10px;font-size:12.5px;line-height:1.55;padding:10px 12px;border-radius:10px;background:rgba(91,141,239,.08);border:1px solid rgba(91,141,239,.3)}
+  .pt{width:100%;min-width:0;font-size:12px}.pt td,.pt th{padding:6px 8px}.pt th{font-size:9.5px}
+  .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;min-width:70px}.bar b{display:block;height:100%;background:linear-gradient(90deg,#e2505f,#d6b26e 50%,#3fb37f)}
+  @media (max-width:900px){.learn{grid-template-columns:1fr}#cc{height:340px}}
+  .foot{text-align:center;font:600 11px var(--mono);color:var(--mute);margin-top:26px}
+  @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2,.agentc{grid-template-columns:1fr}}
+  @media (max-width:560px){.kpis{grid-template-columns:1fr}.ctl{grid-template-columns:1fr}#chart{height:240px}.kpi .v{font-size:24px}}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1>Trading Terminal &amp; Performance</h1>
+      <p>Hasil kerja agent <b>Aurel</b> (#16, XAUUSD Trader) dari tambang emas — bekerja 24 jam di akun HFM MetaTrader 5. Semua order, posisi, dan PnL tercatat otomatis di sini.</p>
+    </div>
+    <span class="sync" id="sync"><i></i><span>Memuat…</span></span>
+  </div>
+  <div id="banner"></div>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card live">
+    <div class="lhead">
+      <div class="tick"><span class="sym"><i id="ldot"></i><span id="lsym">XAUUSD</span></span><span class="px" id="lpx">—</span><span class="chg" id="lchg"></span><span class="ba" id="lba"></span></div>
+      <div class="seg" id="ltf"></div>
+    </div>
+    <div class="src" id="lsrc">Menyambung feed harga…</div>
+    <div id="cc"><canvas id="cv"></canvas><div id="ohlc"></div></div>
+    <div class="learn">
+      <div><small>Aurel belajar candle setiap saat</small><div class="big" id="lnN">0</div><div class="muted" style="font-size:12px" id="lnSub">candle dipelajari</div><div class="lesson" id="lnLast">Menunggu candle pertama selesai…</div></div>
+      <div style="overflow-x:auto"><table class="pt"><thead><tr><th>Pola candle</th><th>Tren</th><th>Sampel</th><th>Peluang naik (1 jam)</th><th>Rata-rata</th></tr></thead><tbody id="lnTbl"></tbody></table></div>
+    </div>
+    <div class="learn">
+      <div><small>Aurel belajar SnR &amp; Order Block</small><div class="big" id="znN">0</div><div class="muted" style="font-size:12px">sentuhan zona dipelajari · memantul = bergerak ≥1.2 ATR menjauh sebelum ditembus (8 candle)</div><div class="lesson" id="znNow">—</div></div>
+      <div style="overflow-x:auto"><table class="pt"><thead><tr><th>Zona</th><th>Tren</th><th>Kejadian</th><th>Memantul (8 candle)</th><th>Rata-rata</th></tr></thead><tbody id="znTbl"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="card pad">
+    <div class="chead"><h3><span class="ic" id="icChart"></span> Analisis Kinerja XAUUSD</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><div class="seg" id="ctype"></div><div class="seg" id="crange"></div></div></div>
+    <div class="cstats" id="cstats"></div>
+    <div id="chart"><div class="tip" id="tip"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card pad"><div class="chead"><h3><span class="ic" id="icCal"></span> Kalender PnL Harian</h3></div>
+      <div class="calnav"><button class="btn xs ghost" id="calPrev"></button><div id="calHead"></div><button class="btn xs ghost" id="calNext"></button></div>
+      <div class="cal" id="cal"></div></div>
+    <div class="card pad"><div class="chead"><h3><span class="ic" id="icPie"></span> Alokasi Portofolio</h3></div><div class="donut" id="donut"></div></div>
+  </div>
+
+  <div class="agentc">
+    <div class="card pad"><div class="chead"><h3><span class="ic" id="icAg"></span> Meja Aurel · Tambang Emas</h3><a class="btn xs ghost" href="/office#room_xau" id="toMine"></a></div><div id="agent"></div></div>
+    <div class="card pad"><div class="chead"><h3><span class="ic" id="icAcc"></span> Cent Trading Account</h3><span class="tag" id="accState">—</span></div><div id="acct"></div><div id="ctl"></div></div>
+  </div>
+
+  <div class="card" style="overflow:hidden">
+    <div class="tabs" id="tabs"></div>
+    <div class="tbl" id="tbl"></div>
+    <div class="tfoot" id="tfoot"></div>
+  </div>
+
+  <div class="card pad" style="margin-top:16px"><div class="chead"><h3><span class="ic" id="icJ"></span> Jurnal Agent Aurel</h3><span class="muted" style="font-size:12px">analisa, order, isi, tutup, risiko</span></div><div class="journal" id="journal"></div></div>
+  <div class="foot" id="foot">Data dari akun MetaTrader 5 lewat jembatan lokal · refresh otomatis 15 detik</div>
+</main>
+
+<script src="/shared.js"></script>
+<script>
+(async () => {
+const S = window.SWEET; S.nav('trading');
+const $ = (id) => document.getElementById(id), I = S.icon, esc = S.esc;
+[['icChart', 'chart'], ['icCal', 'calendar'], ['icPie', 'coin'], ['icAg', 'gold'], ['icAcc', 'shield'], ['icJ', 'file']].forEach(([id, ic]) => { $(id).innerHTML = I(ic, 16); });
+$('calPrev').innerHTML = I('play', 12).replace('<path', '<path transform="rotate(180 12 12)"'); $('calNext').innerHTML = I('play', 12);
+$('toMine').innerHTML = `${I('office', 13)} Lihat di kantor 3D`;
+let me = null; try { me = (await S.api('/api/auth/me')).user; } catch (_) {}
+const admin = me && me.role === 'admin';
+let D = null, SER = null, ctype = 'equity', range = 30, tab = 'pos', calMonth = null;
+const n2 = (v, d = 2) => (v === null || v === undefined || isNaN(v) ? '-' : Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }));
+const usd = (v) => (v < 0 ? '-$' : '$') + n2(Math.abs(v));
+const sgn = (v, d = 2) => (v > 0 ? '+' : v < 0 ? '-' : '') + n2(Math.abs(v), d);
+const cls = (v) => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
+const rp = (v) => (v < 0 ? '-' : '') + 'Rp ' + Math.round(Math.abs(v)).toLocaleString('id-ID');
+const tm = (ms) => ms ? new Date(ms + 7 * 3600e3).toISOString().replace('T', ' ').slice(0, 16) : '-';
+const LBL = { buy_limit: 'BUY LIMIT', sell_limit: 'SELL LIMIT', buy: 'BUY', sell: 'SELL', buy_stop: 'BUY STOP', sell_stop: 'SELL STOP' };
+const ST = { filled: ['done', 'Terisi'], canceled: ['canceled', 'Dibatalkan'], expired: ['finished', 'Kedaluwarsa'], placed: ['pending', 'Menunggu'], rejected: ['rejected', 'Ditolak'], partial: ['pending', 'Sebagian'], started: ['pending', 'Dikirim'] };
+
+function render() {
+  const d = D, k = d.kpi, f = d.factor, cur = d.account.currency || '', live = d.mode === 'live', idr = d.usd_idr;
+  $('eyebrow').innerHTML = `${I('trend', 13)} Autonomous AI Quant Agent · ${live ? 'HFM MetaTrader 5 · live' : 'Menunggu MT5 HFM'}`;
+  const sy = $('sync'); sy.classList.toggle('sim', !live);
+  sy.querySelector('span').textContent = `${live ? 'LIVE · HFM' : 'OFFLINE'} · sinkron ${new Date(Date.now() + 7 * 3600e3).toISOString().slice(11, 19)} WIB · auto-refresh 15 dtk`;
+  const b = d.mt5.bridge;
+  const fu = d.funds || { ok: true };
+  const stop = fu.ok || !live ? '' : `<div class="banner stop">${I('power', 18)}<div><b>Aurel tidak berjalan — ${fu.empty ? 'saldo kosong / habis' : 'trading tertahan'}.</b> ${esc(fu.reason || '')}<br>
+    Minimal saldo agar Aurel mau pasang order: <b>$${n2(fu.min_usd ?? d.settings.min_balance_usd)}</b>${fu.cent ? ` (= ${n2(fu.min, 0)} USC di akun cent)` : ''}. Isi saldo akun HFM kamu — begitu saldo masuk, Aurel otomatis mulai trading XAUUSD lagi. Order limit yang menggantung dibatalkan; posisi yang masih terbuka tetap dijaga SL/TP.</div></div>`;
+  $('banner').innerHTML = stop + (live
+    ? `<div class="banner live">${I('check', 18)}<div><b>Terhubung ke akun HFM asli</b> — login ${esc(d.mt5.login)} @ ${esc(d.mt5.server)}${b.symbol ? ` · simbol ${esc(b.symbol)}` : ''}. Aurel memasang order sungguhan dengan lot ${d.settings.lot} dan SL/TP di setiap order.</div></div>`
+    : `<div class="banner sim">${I('alert', 18)}<div><b>MT5 HFM belum terhubung — Aurel menunggu.</b> Harga XAUUSD, saldo, order, dan grafik di halaman ini <b>hanya</b> diambil dari harga pasar broker HFM lewat MetaTrader 5 (akun cent ${esc(d.mt5.login || '')} · ${esc(d.mt5.server || '')}). Tidak ada sumber harga lain.
+      ${d.mt5.configured ? `Status bridge MT5: <code>${esc(b.state)}</code>${b.error ? ` — ${esc(b.error)}` : ''}` : 'Akun MT5 belum diisi di <code>.env</code>.'}
+      <ol><li>Jalankan <code>scripts\\mt5-install.bat</code> (memasang paket Python MetaTrader5).</li><li>Pasang terminal MetaTrader 5 HFM, login sekali ke akun ${esc(d.mt5.login || '')} (server ${esc(d.mt5.server || '')}), aktifkan <i>Algo Trading</i>.</li><li>Jalankan ulang <code>scripts\\start.bat</code> — halaman ini otomatis menjadi LIVE.</li></ol></div></div>`);
+  // KPI
+  const eqUsd = k.equity_usd, unr = k.unrealized * f, cl = k.closed_usd;
+  $('kpis').innerHTML = `
+    <div class="card kpi"><h5>Total Ekuitas Portofolio <span>${I('coin', 15)}</span></h5><div class="v">${usd(eqUsd)}</div><div class="s">${n2(k.equity)} ${esc(cur)} · ${rp(eqUsd * idr)}</div>
+      <div class="chips"><span class="pill">${I(live ? 'shield' : 'alert', 12)} ${live ? 'HFM terverifikasi' : 'Offline'}</span>${d.funds && !d.funds.ok ? `<span class="pill neg">${I('power', 12)} Saldo kurang</span>` : ''}<span class="pill">Puncak ${usd((k.peak || 0) * f)}</span></div></div>
+    <div class="card kpi"><h5>Unrealized PnL (floating) <span>${I('trend', 15)}</span></h5><div class="v ${cls(unr)}">${usd(unr)}</div><div class="s">${d.positions.length} posisi aktif terbuka · ${d.pending.length} order limit</div>
+      <div class="chips"><span class="pill">${I('clock', 12)} Live margin monitor</span></div></div>
+    <div class="card kpi"><h5>Closed PnL (terealisasi) <span>${I('chart', 15)}</span></h5><div class="v ${cls(cl)}">${usd(cl)}</div><div class="s">${rp(cl * idr)} · ${k.trades} trade · win rate ${n2(k.win_rate, 0)}%</div>
+      <div class="chips"><span class="pill">${I('check', 12)} Sejak ${k.since ? new Date(k.since).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</span></div></div>
+    <div class="card kpi"><h5>Ringkasan Return <span>${I('flag', 15)}</span></h5>
+      <div class="ret">${[['24 JAM', k.ret.d1], ['7 HARI', k.ret.d7], ['30 HARI', k.ret.d30]].map(([a, v]) => `<div><small>${a}</small><b class="${cls(v)}">${sgn(v || 0)}%</b></div>`).join('')}</div>
+      <div class="chips"><span class="pill">${I('chart', 12)} Metrik compound ekuitas</span></div></div>`;
+  renderAgent(); renderAcct(); renderDonut(); renderTable();
+}
+
+function renderAgent() {
+  const d = D, a = d.agent || { name: 'Aurel', role: 'XAUUSD Trader', color: '#d6b26e' }, an = d.analysis, sy = d.symbol || {};
+  const flags = d.pending.map((o) => `<span class="lflag ${/BUY/.test(o.kind) ? 'buy' : 'sell'}">${I('flag', 13)} ${esc(o.kind)} ${o.volume_current ?? o.volume_initial} @ ${n2(o.price_open, sy.digits ?? 2)}</span>`)
+    .concat(d.positions.map((p) => `<span class="lflag posn">${I('coin', 13)} ${p.side} ${p.volume} · ${sgn(p.profit)} ${esc(d.account.currency || '')}</span>`)).join('');
+  $('agent').innerHTML = `<div class="ag">${S.avatar(a, 58)}<div><h4>${esc(a.name)} <span class="tag running"><span class="dotlive"></span> 24 jam</span></h4><div class="role">Agent #16 · ${esc(a.role)} · ${esc(d.tf)}</div></div></div>
+    <div class="note"><small>STATUS SEKARANG</small>${esc(d.note || '-')}${d.error ? `<div class="neg" style="margin-top:4px">${esc(d.error)}</div>` : ''}${d.guard ? `<div class="neg" style="margin-top:4px">${esc(d.guard.reason)}</div>` : ''}</div>
+    <div class="ind">
+      <div><small>${esc(sy.name || 'XAUUSD')} BID</small><b>${n2(sy.bid, sy.digits ?? 2)}</b></div><div><small>ASK</small><b>${n2(sy.ask, sy.digits ?? 2)}</b></div>
+      <div><small>TREN</small><b class="${an && an.trend === 'naik' ? 'pos' : an && an.trend === 'turun' ? 'neg' : ''}">${an ? an.trend.toUpperCase() : '-'}</b></div>
+      <div><small>EMA20 / EMA50</small><b>${an ? `${n2(an.ema20)} / ${n2(an.ema50)}` : '-'}</b></div><div><small>ATR(14)</small><b>${an ? n2(an.atr) : '-'}</b></div><div><small>RSI(14)</small><b>${an ? n2(an.rsi, 0) : '-'}</b></div>
+    </div>
+    <div class="flags">${flags || '<span class="muted" style="font-size:12.5px">Belum ada bendera — Aurel menunggu setup Buy Limit / Sell Limit.</span>'}</div>`;
+}
+
+function renderAcct() {
+  const d = D, acc = d.account, m = d.mt5, live = d.mode === 'live';
+  $('accState').className = 'tag ' + (live ? 'done' : 'pending'); $('accState').textContent = live ? 'Terhubung' : 'Offline';
+  const row = (a, b) => `<div class="r"><span>${a}</span><b>${b}</b></div>`;
+  $('acct').innerHTML = `<div class="acct">${row('Nickname', esc(m.nickname || '-'))}${row('Trading account ID (Login)', esc(m.login || '-'))}${row('Server', esc(m.server || '-'))}${row('Password', '•••••••••• <small class="muted" style="font-family:inherit">(tersimpan di .env)</small>')}
+    ${row('Platform', `${esc(m.platform)} · ${esc(m.account_type)}`)}${row('Saldo / Ekuitas', `${n2(acc.balance)} / ${n2(acc.equity)} ${esc(acc.currency || '')}`)}${row('Margin bebas · Leverage', `${n2(acc.margin_free)} · 1:${acc.leverage || '-'}`)}${row('Bridge MT5', esc(m.bridge.state) + (m.bridge.windows ? '' : ' (server bukan Windows)'))}</div>`;
+  const st = d.settings;
+  $('ctl').innerHTML = admin ? `
+    <div class="sw" style="margin-top:10px">Trading otomatis <input type="checkbox" id="sEn" ${st.enabled ? 'checked' : ''}></div>
+    <div class="sw">Review AI sebelum order <input type="checkbox" id="sAi" ${st.ai_review ? 'checked' : ''}></div>
+    <div class="ctl"><label>Lot per order (maks ${st.max_lot})<input id="sLot" type="number" step="0.01" min="0.01" max="${st.max_lot}" value="${st.lot}"></label>
+      <label>Batas rugi harian (%)<input id="sDl" type="number" step="0.5" min="1" max="20" value="${st.daily_loss_pct}"></label>
+      <label>Maks order limit<select id="sMp">${[1, 2, 3].map((v) => `<option ${v === st.max_pending ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label>Maks posisi terbuka<select id="sMo">${[1, 2, 3].map((v) => `<option ${v === st.max_positions ? 'selected' : ''}>${v}</option>`).join('')}</select></label></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm gold" id="sSave">${I('check', 14)} Simpan</button><button class="btn sm red" id="sPanic">${I('power', 14)} STOP darurat</button>
+      ${m.configured && m.bridge.windows && !m.bridge.live ? `<button class="btn sm ghost" id="sBridge">${I('play', 13)} Nyalakan bridge MT5</button>` : ''}</div>
+    <div class="muted" style="font-size:11.5px;margin-top:8px">Order kedaluwarsa ${st.ttl_min} menit. STOP darurat membatalkan semua order Aurel, menutup posisinya, dan mematikan trading.</div>`
+    : `<div class="muted" style="font-size:12px;margin-top:10px">Pengaturan trading hanya untuk admin.</div>`;
+  if (!admin) return;
+  $('sSave').onclick = async () => { try { await S.api('/api/trading/settings', { body: { enabled: $('sEn').checked, ai_review: $('sAi').checked, lot: Number($('sLot').value), daily_loss_pct: Number($('sDl').value), max_pending: Number($('sMp').value), max_positions: Number($('sMo').value) } }); S.toast({ type: 'success', title: 'Pengaturan trading disimpan' }); load(); } catch (e) { S.toast({ type: 'warn', title: 'Gagal', text: e.message }); } };
+  $('sPanic').onclick = async () => { if (!confirm('Hentikan trading? Semua order Aurel dibatalkan dan posisinya ditutup.')) return; try { const r = await S.api('/api/trading/panic', { body: {} }); S.toast({ type: 'warn', title: 'Trading dihentikan', text: `${r.canceled} order dibatalkan • ${r.closed} posisi ditutup` }); load(); } catch (e) { S.toast({ type: 'warn', title: 'Gagal', text: e.message }); } };
+  if ($('sBridge')) $('sBridge').onclick = async () => { try { await S.api('/api/trading/bridge/start', { body: {} }); S.toast({ type: 'info', title: 'Menyalakan bridge MT5…' }); setTimeout(load, 4000); } catch (e) { S.toast({ type: 'warn', title: 'Gagal', text: e.message }); } };
+}
+
+function renderDonut() {
+  const d = D, acc = d.account, f = d.factor;
+  const margin = Math.max(0, acc.margin || 0), fl = acc.profit || 0, free = Math.max(0, (acc.equity || 0) - margin);
+  const parts = [['Kas bebas (free margin)', free, '#5b8def'], ['Margin XAUUSD', margin, '#d6b26e'], ['Floating PnL', Math.abs(fl), fl >= 0 ? '#3fb37f' : '#e2505f']].filter((p) => p[1] > 0);
+  const tot = parts.reduce((s, p) => s + p[1], 0) || 1;
+  let a0 = -Math.PI / 2; const R = 70, r = 48;
+  const arcs = parts.map(([, v, c]) => {
+    const a1 = a0 + (v / tot) * Math.PI * 2 - 0.0001, big = a1 - a0 > Math.PI ? 1 : 0;
+    const p = (ang, rad) => `${100 + Math.cos(ang) * rad},${100 + Math.sin(ang) * rad}`;
+    const path = `M${p(a0, R)} A${R},${R} 0 ${big} 1 ${p(a1, R)} L${p(a1, r)} A${r},${r} 0 ${big} 0 ${p(a0, r)} Z`; a0 = a1 + 0.0001;
+    return `<path d="${path}" fill="${c}"/>`;
+  }).join('');
+  $('donut').innerHTML = `<svg viewBox="0 0 200 200" width="190" height="190">${arcs}<text x="100" y="94" text-anchor="middle" fill="#8d7f83" font-size="9" font-weight="800" font-family="JetBrains Mono" letter-spacing="1">TOTAL ASSET</text><text x="100" y="114" text-anchor="middle" fill="#fff" font-size="17" font-weight="800" font-family="JetBrains Mono">${usd((acc.equity || 0) * f)}</text></svg>
+    <div class="legend">${parts.map(([l, v, c]) => `<div class="r" style="--c:${c}"><b><i></i>${l}</b><span>${usd(v * f)} (${n2(v / tot * 100, 1)}%)</span></div>`).join('') || '<div class="muted">Belum ada data akun</div>'}</div>`;
+}
+
+function renderTable() {
+  const d = D, cur = d.account.currency || '', dg = (d.symbol && d.symbol.digits) ?? 2;
+  const tabs = [['pos', 'layers', 'Posisi Aktif', d.positions.length], ['pend', 'flag', 'Order Limit', d.pending.length], ['hist', 'clock', 'Riwayat Order', null], ['fills', 'trend', 'Rincian Eksekusi (Fills)', null]];
+  $('tabs').innerHTML = tabs.map(([id, ic, l, c]) => `<button data-t="${id}" class="${tab === id ? 'on' : ''}">${I(ic, 14)} ${l}${c ? ` <span class="cnt">${c}</span>` : ''}</button>`).join('');
+  const empty = (t, s) => `<div class="empty2">${I('check', 34)}<div style="margin-top:10px">${t}</div><small>${s}</small></div>`;
+  const side = (s) => `<span class="side ${/BUY/i.test(s) ? 'b' : 's'}">${esc(s)}</span>`;
+  if (tab === 'pos') {
+    $('tbl').innerHTML = d.positions.length ? `<table><thead><tr><th>Pair</th><th>Side</th><th>Size</th><th>Entry price</th><th>Mark price</th><th>SL</th><th>TP</th><th>Swap</th><th>UPnL (${esc(cur)})</th><th>UPnL ($)</th><th>Dibuka</th><th>Aksi</th></tr></thead><tbody>${d.positions.map((p) => `<tr><td><b>${esc(p.symbol)}</b>${p.own ? '' : ' <span class="tag">manual</span>'}</td><td>${side(p.side)}</td><td class="m">${p.volume}</td><td class="m">${n2(p.price_open, dg)}</td><td class="m">${n2(p.price_current, dg)}</td><td class="m">${n2(p.sl, dg)}</td><td class="m">${n2(p.tp, dg)}</td><td class="m">${n2(p.swap)}</td><td class="m ${cls(p.profit)}">${sgn(p.profit)}</td><td class="m ${cls(p.profit)}">${usd(p.profit * d.factor)}</td><td class="m">${tm(p.time * 1000)}</td><td>${admin ? `<button class="btn xs red" data-close="${p.ticket}">Tutup</button>` : ''}</td></tr>`).join('')}</tbody></table>`
+      : empty('Tidak ada posisi XAUUSD yang sedang aktif saat ini.', 'Aurel siap mengeksekusi order jika Buy Limit / Sell Limit tersentuh.');
+  } else if (tab === 'pend') {
+    $('tbl').innerHTML = d.pending.length ? `<table><thead><tr><th>Ticket</th><th>Jenis</th><th>Size</th><th>Harga limit</th><th>SL</th><th>TP</th><th>Dipasang</th><th>Kedaluwarsa</th><th>Alasan Aurel</th><th>Aksi</th></tr></thead><tbody>${d.pending.map((o) => `<tr><td class="m">#${o.ticket}</td><td>${side(o.kind)}</td><td class="m">${o.volume_current ?? o.volume_initial}</td><td class="m">${n2(o.price_open, dg)}</td><td class="m">${n2(o.sl, dg)}</td><td class="m">${n2(o.tp, dg)}</td><td class="m">${tm(o.time_setup * 1000)}</td><td class="m">${o.time_expiration ? tm(o.time_expiration * 1000) : 'GTC'}</td><td style="white-space:normal;min-width:260px;font-size:12px;color:var(--ink2)">${esc(o.reason || (o.own ? '-' : 'order manual'))}</td><td>${admin ? `<button class="btn xs ghost" data-cancel="${o.ticket}">Batalkan</button>` : ''}</td></tr>`).join('')}</tbody></table>`
+      : empty('Tidak ada order limit yang menggantung.', 'Bendera BUY LIMIT / SELL LIMIT muncul di meja Aurel saat order terpasang.');
+  } else if (tab === 'hist') {
+    $('tbl').innerHTML = '<div class="empty2">Memuat…</div>';
+    S.api('/api/trading/orders?limit=100').then((rows) => {
+      if (tab !== 'hist') return;
+      $('tbl').innerHTML = rows.length ? `<table><thead><tr><th>Ticket</th><th>Waktu</th><th>Jenis</th><th>Size</th><th>Harga</th><th>SL</th><th>TP</th><th>Status</th><th>Selesai</th><th>Alasan</th></tr></thead><tbody>${rows.map((o) => { const s = ST[o.state] || ['', o.state]; return `<tr><td class="m">#${o.ticket}</td><td class="m">${tm(o.ts_setup)}</td><td>${side(LBL[o.type] || o.type)}</td><td class="m">${o.volume}</td><td class="m">${n2(o.price, dg)}</td><td class="m">${o.sl ? n2(o.sl, dg) : '-'}</td><td class="m">${o.tp ? n2(o.tp, dg) : '-'}</td><td><span class="tag ${s[0]}">${s[1]}</span></td><td class="m">${tm(o.ts_done)}</td><td style="white-space:normal;min-width:220px;font-size:12px;color:var(--ink2)">${esc(o.reason || '')}</td></tr>`; }).join('')}</tbody></table>`
+        : empty('Belum ada riwayat order.', '');
+    });
+  } else {
+    $('tbl').innerHTML = '<div class="empty2">Memuat…</div>';
+    S.api('/api/trading/deals?limit=200').then((rows) => {
+      if (tab !== 'fills') return;
+      rows = rows.filter((x) => x.type === 'buy' || x.type === 'sell');
+      $('tbl').innerHTML = rows.length ? `<table><thead><tr><th>Deal</th><th>Waktu (WIB)</th><th>Pair</th><th>Side</th><th>Entry</th><th>Size</th><th>Harga</th><th>Komisi</th><th>Swap</th><th>Profit (${esc(cur)})</th><th>Profit ($)</th><th>Catatan</th></tr></thead><tbody>${rows.map((x) => { const pnl = x.profit + x.commission + x.swap + x.fee; return `<tr><td class="m">#${x.ticket}</td><td class="m">${tm(x.ts)}</td><td><b>${esc(x.symbol)}</b></td><td>${side(x.type.toUpperCase())}</td><td>${x.entry === 'in' ? 'Buka' : 'Tutup'}</td><td class="m">${x.volume}</td><td class="m">${n2(x.price, dg)}</td><td class="m">${n2(x.commission)}</td><td class="m">${n2(x.swap)}</td><td class="m ${cls(pnl)}">${x.entry === 'in' ? '-' : sgn(pnl)}</td><td class="m ${cls(pnl)}">${x.entry === 'in' ? '-' : usd(pnl * d.factor)}</td><td class="muted">${esc(x.comment || '')}</td></tr>`; }).join('')}</tbody></table>`
+        : empty('Belum ada eksekusi.', '');
+    });
+  }
+  const acc = d.account;
+  $('tfoot').innerHTML = `<span>${I('coin', 13)} Saldo akun margin:</span><span>${esc(acc.currency || '')}: Balance <b>${n2(acc.balance)}</b> · Ekuitas <b>${n2(acc.equity)}</b> · Tersedia <b>${n2(acc.margin_free)}</b> · ≈ ${usd((acc.equity || 0) * d.factor)}</span>`;
+}
+$('tabs').onclick = (e) => { const b = e.target.closest('[data-t]'); if (b) { tab = b.dataset.t; renderTable(); } };
+$('tbl').onclick = async (e) => {
+  const c = e.target.closest('[data-close]'), x = e.target.closest('[data-cancel]');
+  try {
+    if (c && confirm(`Tutup posisi #${c.dataset.close}?`)) { await S.api(`/api/trading/close/${c.dataset.close}`, { body: {} }); S.toast({ type: 'success', title: 'Posisi ditutup' }); load(); }
+    if (x && confirm(`Batalkan order #${x.dataset.cancel}?`)) { await S.api(`/api/trading/cancel/${x.dataset.cancel}`, { body: {} }); S.toast({ type: 'success', title: 'Order dibatalkan' }); load(); }
+  } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); }
+};
+
+// ---------- Grafik ----------
+$('ctype').innerHTML = [['pnl', 'trend', 'PnL Kumulatif ($)'], ['equity', 'coin', 'Trend Ekuitas ($)'], ['roi', 'flag', 'ROI Kumulatif (%)']].map(([id, ic, l]) => `<button data-c="${id}">${I(ic, 12)} ${l}</button>`).join('');
+$('crange').innerHTML = [[7, '7H'], [30, '30H'], [90, '90H']].map(([v, l]) => `<button data-r="${v}">${l}</button>`).join('');
+$('ctype').onclick = (e) => { const b = e.target.closest('[data-c]'); if (b) { ctype = b.dataset.c; drawChart(); } };
+$('crange').onclick = async (e) => { const b = e.target.closest('[data-r]'); if (b) { range = Number(b.dataset.r); SER = await S.api('/api/trading/series?days=' + range); drawChart(); } };
+function drawChart() {
+  [...$('ctype').children].forEach((b) => b.classList.toggle('on', b.dataset.c === ctype));
+  [...$('crange').children].forEach((b) => b.classList.toggle('on', Number(b.dataset.r) === range));
+  if (!SER) return;
+  const f = SER.factor || 1;
+  let pts = [];
+  if (ctype === 'pnl') pts = SER.pnl.map((p) => ({ t: p.ts, v: p.cum * f }));
+  else { const e0 = SER.equity.length ? SER.equity[0].equity : 0; pts = SER.equity.map((p) => ({ t: p.ts, v: ctype === 'roi' ? (e0 ? (p.equity - e0) / e0 * 100 : 0) : p.equity * f })); }
+  if (D && ctype !== 'pnl' && pts.length) { const eq = D.account.equity || 0, e0 = SER.equity[0].equity; pts.push({ t: Date.now(), v: ctype === 'roi' ? (e0 ? (eq - e0) / e0 * 100 : 0) : eq * f }); }
+  const last = pts.length ? pts[pts.length - 1].v : 0, max = pts.length ? Math.max(...pts.map((p) => p.v)) : 0;
+  $('cstats').innerHTML = ctype === 'pnl' ? `<div><small>PnL kumulatif</small><b class="${cls(last)}">${usd(last)}</b></div><div><small>Trade ditutup</small><b>${SER.pnl.length}</b></div>`
+    : ctype === 'roi' ? `<div><small>ROI ${range} hari</small><b class="${cls(last)}">${sgn(last)}%</b></div><div><small>ROI tertinggi</small><b>${sgn(max)}%</b></div>`
+    : `<div><small>Ekuitas terkini</small><b style="color:#8fb0ff">${usd(last)}</b></div><div><small>Ekuitas tertinggi</small><b>${usd(max)}</b></div>`;
+  const box = $('chart'), W = box.clientWidth || 800, H = box.clientHeight || 320, padL = 64, padR = 14, padT = 14, padB = 30;
+  if (pts.length < 2) { box.querySelector('svg')?.remove(); if (!box.querySelector('.empty2')) box.insertAdjacentHTML('beforeend', '<div class="empty2">Belum cukup data untuk grafik.</div>'); return; }
+  box.querySelector('.empty2')?.remove();
+  const t0 = pts[0].t, t1 = pts[pts.length - 1].t || t0 + 1;
+  let lo = Math.min(...pts.map((p) => p.v)), hi = Math.max(...pts.map((p) => p.v)); if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
+  const padV = (hi - lo) * 0.08; lo -= padV; hi += padV;
+  const X = (t) => padL + (t - t0) / Math.max(1, t1 - t0) * (W - padL - padR), Y = (v) => padT + (hi - v) / (hi - lo) * (H - padT - padB);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join('');
+  const up = last >= (pts[0].v || 0), col = ctype === 'equity' ? '#7f9cff' : up ? '#3fb37f' : '#e2505f';
+  const fmtV = (v) => ctype === 'roi' ? `${v.toFixed(2)}%` : usd(v);
+  const yTicks = [0, 0.5, 1].map((k) => lo + padV + (hi - lo - 2 * padV) * k);
+  const xTicks = [0, 0.5, 1].map((k) => t0 + (t1 - t0) * k);
+  box.querySelector('svg')?.remove();
+  box.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${yTicks.map((v) => `<line x1="${padL}" x2="${W - padR}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.07)"/><text x="${padL - 8}" y="${Y(v) + 4}" text-anchor="end" fill="#8d7f83" font-size="11" font-family="JetBrains Mono">${fmtV(v)}</text>`).join('')}
+    ${xTicks.map((t, i) => `<text x="${X(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === 2 ? 'end' : 'middle'}" fill="#8d7f83" font-size="11" font-family="JetBrains Mono">${new Date(t + 7 * 3600e3).toISOString().slice(0, 10)}</text>`).join('')}
+    <path d="${line} L${X(t1)},${H - padB} L${X(t0)},${H - padB} Z" fill="url(#ga)"/><path d="${line}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>
+    <line id="cx" y1="${padT}" y2="${H - padB}" stroke="rgba(255,255,255,.25)" stroke-dasharray="3 3" style="display:none"/><circle id="cd" r="4" fill="${col}" stroke="#fff" stroke-width="1.5" style="display:none"/></svg>`);
+  const svg = box.querySelector('svg'), tip = $('tip');
+  svg.onmousemove = (e) => {
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+    let best = pts[0]; pts.forEach((p) => { if (Math.abs(X(p.t) - x) < Math.abs(X(best.t) - x)) best = p; });
+    const cx = svg.querySelector('#cx'), cd = svg.querySelector('#cd');
+    cx.setAttribute('x1', X(best.t)); cx.setAttribute('x2', X(best.t)); cx.style.display = ''; cd.setAttribute('cx', X(best.t)); cd.setAttribute('cy', Y(best.v)); cd.style.display = '';
+    tip.style.display = 'block'; tip.style.left = (X(best.t) / W * r.width) + 'px'; tip.style.top = (Y(best.v) / H * r.height) + 'px';
+    tip.innerHTML = `${fmtV(best.v)}<br><span class="muted">${tm(best.t)}</span>`;
+  };
+  svg.onmouseleave = () => { tip.style.display = 'none'; svg.querySelector('#cx').style.display = 'none'; svg.querySelector('#cd').style.display = 'none'; };
+}
+addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(drawChart, 150); });
+
+// ---------- Kalender ----------
+async function loadCal() {
+  const c = await S.api('/api/trading/calendar' + (calMonth ? `?month=${calMonth}` : ''));
+  calMonth = c.month;
+  const [y, m] = c.month.split('-').map(Number), f = c.factor || 1;
+  $('calHead').innerHTML = `<b>${new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</b><span class="${cls(c.total)}">${usd(c.total * f)}</span> <small class="muted">(${c.active} hari aktif)</small>`;
+  const first = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7, days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
+  let h = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'].map((x) => `<div class="h">${x}</div>`).join('') + '<div></div>'.repeat(first);
+  for (let d = 1; d <= days; d++) { const v = c.days[d]; const iso = `${c.month}-${String(d).padStart(2, '0')}`; h += `<div class="d ${v ? (v.pnl >= 0 ? 'p' : 'n') : ''} ${iso === today ? 'today' : ''}" title="${v ? `${v.n} trade` : ''}">${d}<small>${v ? (v.pnl >= 0 ? '+' : '-') + '$' + n2(Math.abs(v.pnl * f)) : '—'}</small></div>`; }
+  $('cal').innerHTML = h;
+}
+const shiftMonth = (k) => { const [y, m] = calMonth.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + k, 1)); calMonth = d.toISOString().slice(0, 7); loadCal(); };
+$('calPrev').onclick = () => shiftMonth(-1); $('calNext').onclick = () => shiftMonth(1);
+
+// ---------- Jurnal ----------
+async function loadJournal() {
+  const rows = await S.api('/api/trading/journal?limit=60');
+  $('journal').innerHTML = rows.map((r) => `<div class="j"><em class="${esc(r.kind)}">${esc(r.kind)}</em><div>${esc(r.text)}<small>${tm(r.ts)} WIB</small></div></div>`).join('') || '<div class="empty2">Belum ada catatan</div>';
+}
+
+
+// ---------- Grafik harga realtime (candlestick) ----------
+const LV = { tf: 'M15', bars: [], src: '', info: null, tick: null, view: 110, off: 0, hover: null, dirty: true, prev: null };
+const TFS = { M1: 60, M5: 300, M15: 900, H1: 3600, H4: 14400 };
+$('ltf').innerHTML = Object.keys(TFS).map((t) => `<button data-tf="${t}">${t}</button>`).join('') + '<button data-z="1" class="on" title="Tampilkan Support/Resistance & Order Block">SnR · OB</button>';
+LV.showZ = true;
+$('ltf').onclick = (e) => { const z = e.target.closest('[data-z]'); if (z) { LV.showZ = !LV.showZ; z.classList.toggle('on', LV.showZ); LV.dirty = true; return; } const b = e.target.closest('[data-tf]'); if (b) { LV.tf = b.dataset.tf; LV.off = 0; loadCandles(); } };
+const cv = $('cv'), cx = cv.getContext('2d');
+function emaArr(v, n) { const k = 2 / (n + 1); let e = v[0]; return v.map((x, i) => (e = i ? x * k + e * (1 - k) : x)); }
+async function loadCandles() {
+  [...$('ltf').children].forEach((b) => { if (b.dataset.tf) b.classList.toggle('on', b.dataset.tf === LV.tf); });
+  try {
+    const r = await S.api(`/api/trading/candles?tf=${LV.tf}&count=300`);
+    LV.bars = r.bars || []; LV.zones = r.zones || null; LV.src = r.source; LV.info = r.info; if (r.tick) LV.tick = r.tick; LV.realTf = r.tf;
+    renderTick(); LV.dirty = true;
+  } catch (e) { $('lsrc').textContent = 'Gagal memuat candle: ' + e.message; }
+}
+function renderTick() {
+  const t = LV.tick, info = LV.info || {};
+  const live = (t && t.s) === 'mt5' || LV.src === 'mt5';
+  $('ldot').className = live ? '' : 'sim';
+  const dg = (t && t.digits) || 2;
+  if (t && t.s === 'mt5') {
+    const el = $('lpx');
+    if (LV.prev !== null && t.bid !== LV.prev) { el.classList.remove('up', 'dn'); void el.offsetWidth; el.classList.add(t.bid > LV.prev ? 'up' : 'dn'); }
+    LV.prev = t.bid; el.textContent = n2(t.bid, dg);
+    $('lsym').textContent = t.name || 'XAUUSD';
+    $('lba').textContent = `Bid ${n2(t.bid, dg)} · Ask ${n2(t.ask, dg)} · Spread ${n2((t.ask - t.bid), dg)}${t.open === false ? ' · pasar tutup' : ''}`;
+    const day = LV.bars.length ? LV.bars.find((b) => b.t >= Math.floor((Date.now() / 1000 + 7 * 3600) / 86400) * 86400 - 7 * 3600) : null;
+    if (day) { const ch = t.bid - day.o; $('lchg').innerHTML = `<span class="${cls(ch)}">${sgn(ch, dg)} (${sgn(ch / day.o * 100)}%) hari ini</span>`; }
+  }
+  if (!live) { $('lpx').textContent = '—'; $('lba').textContent = 'Menunggu harga pasar dari MT5 HFM'; $('lchg').textContent = ''; }
+  const lbl = (t && t.label) || info.label || '';
+  $('lsrc').innerHTML = `Sumber harga: <b style="color:${live ? '#86dcb2' : '#e9cf98'}">${esc(lbl)}</b>${!live && info.bridge ? ` · bridge: ${esc(info.bridge.state)}${info.bridge.error ? ` — ${esc(info.bridge.error)}` : ''}` : ''} · update ${t ? new Date(t.t * 1000 + 7 * 3600e3).toISOString().slice(11, 19) : '-'} WIB`;
+}
+S.on('tick', (t) => {
+  LV.tick = t; renderTick();
+  if (LV.src && t.s !== LV.src && !LV.loading) { LV.loading = true; loadCandles().finally(() => { LV.loading = false; }); return; }
+  const sec = TFS[LV.realTf || LV.tf] || 900, b = LV.bars[LV.bars.length - 1];
+  if (!b || t.s !== LV.src) return;
+  const bt = Math.floor(t.t / sec) * sec;
+  if (bt > b.t) LV.bars.push({ t: bt, o: b.c, h: Math.max(b.c, t.bid), l: Math.min(b.c, t.bid), c: t.bid, v: 0 });
+  else { b.c = t.bid; b.h = Math.max(b.h, t.bid); b.l = Math.min(b.l, t.bid); }
+  if (LV.bars.length > 600) LV.bars.shift();
+  LV.dirty = true;
+});
+function drawCandles() {
+  requestAnimationFrame(drawCandles);
+  if (!LV.dirty) return; LV.dirty = false;
+  const box = $('cc'), W = box.clientWidth, H = box.clientHeight, dpr = Math.min(2, devicePixelRatio || 1);
+  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H);
+  const all = LV.bars; if (all.length < 2) { cx.fillStyle = '#8d7f83'; cx.font = '600 13px sans-serif'; cx.fillText(LV.src === 'offline' ? 'Menunggu harga pasar XAUUSD dari MetaTrader 5 HFM… (grafik muncul otomatis setelah bridge terhubung)' : 'Memuat candle…', 20, 40); return; }
+  const dg = (LV.tick && LV.tick.digits) || 2;
+  const closes = all.map((b) => b.c), e20 = emaArr(closes, 20), e50 = emaArr(closes, 50);
+  const n = Math.min(LV.view, all.length), end = Math.max(n, all.length - LV.off), start = end - n;
+  const bars = all.slice(start, end);
+  const padR = 78, padB = 24, padT = 14, cw = (W - padR) / n;
+  const lines = [];
+  (D && D.pending || []).forEach((o) => lines.push({ p: o.price_open, c: /BUY/.test(o.kind) ? '#3fb37f' : '#e2505f', t: o.kind }));
+  (D && D.positions || []).forEach((p) => { lines.push({ p: p.price_open, c: '#d6b26e', t: `${p.side} ${p.volume}` }); if (p.sl) lines.push({ p: p.sl, c: '#e2505f', t: 'SL' }); if (p.tp) lines.push({ p: p.tp, c: '#3fb37f', t: 'TP' }); });
+  let lo = Math.min(...bars.map((b) => b.l)), hi = Math.max(...bars.map((b) => b.h));
+  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+  const Y = (v) => padT + (hi - v) / (hi - lo) * (H - padT - padB);
+  // grid + sumbu harga
+  cx.font = '600 11px JetBrains Mono, monospace'; cx.textAlign = 'left';
+  for (let k = 0; k <= 5; k++) { const v = lo + (hi - lo) * k / 5, y = Y(v); cx.strokeStyle = 'rgba(255,255,255,.06)'; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W - padR, y); cx.stroke(); cx.fillStyle = '#8d7f83'; cx.fillText(n2(v, dg), W - padR + 8, y + 4); }
+  const sec = TFS[LV.realTf || LV.tf] || 900, step = Math.max(1, Math.round(n / 6));
+  cx.textAlign = 'center';
+  bars.forEach((b, i) => { if (i % step) return; const x = i * cw + cw / 2; cx.fillStyle = '#8d7f83'; const d = new Date(b.t * 1000 + 7 * 3600e3).toISOString(); cx.fillText(sec >= 14400 ? d.slice(5, 10) : d.slice(11, 16), x, H - 7); });
+  // Order Block (kotak) & Support/Resistance (garis)
+  if (LV.showZ && LV.zones) {
+    cx.textAlign = 'left'; cx.font = '700 10px JetBrains Mono, monospace';
+    (LV.zones.obs || []).forEach((o) => {
+      if (o.bottom > hi || o.top < lo) return;
+      let i0 = bars.findIndex((b) => b.t >= o.t); if (i0 < 0) return; const x0 = i0 * cw, y1 = Y(Math.min(hi, o.top)), y2 = Y(Math.max(lo, o.bottom));
+      const bull = o.type === 'ob_bull';
+      cx.fillStyle = bull ? 'rgba(52,211,153,.13)' : 'rgba(248,113,113,.13)'; cx.fillRect(x0, y1, W - padR - x0, Math.max(2, y2 - y1));
+      cx.strokeStyle = bull ? 'rgba(52,211,153,.55)' : 'rgba(248,113,113,.55)'; cx.lineWidth = 1; cx.strokeRect(x0 + 0.5, y1 + 0.5, W - padR - x0 - 1, Math.max(2, y2 - y1) - 1);
+      cx.fillStyle = bull ? '#86efac' : '#fca5a5'; cx.fillText(`${bull ? 'OB BULL' : 'OB BEAR'}${o.status === 'fresh' ? '' : ' · diuji'}`, x0 + 4, y1 + 11);
+    });
+    const lp = all[all.length - 1].c, lvAll = LV.zones.levels || [];
+    const shown = [...lvAll.filter((x) => x.price < lp).sort((a, b) => b.price - a.price).slice(0, 4), ...lvAll.filter((x) => x.price >= lp).sort((a, b) => a.price - b.price).slice(0, 4)];
+    shown.forEach((L) => {
+      if (L.price < lo || L.price > hi) return;
+      const y = Y(L.price), sup = L.type === 'support';
+      cx.strokeStyle = sup ? 'rgba(63,179,127,.75)' : 'rgba(226,80,95,.75)'; cx.lineWidth = Math.min(3, 0.6 + L.touches * 0.35); cx.setLineDash([8, 5]);
+      cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W - padR, y); cx.stroke(); cx.setLineDash([]); cx.lineWidth = 1;
+      const tx = `${sup ? 'S' : 'R'} ${n2(L.price, dg)} ×${L.touches}`; const tw = cx.measureText(tx).width;
+      cx.fillStyle = sup ? 'rgba(20,70,48,.9)' : 'rgba(90,20,32,.9)'; cx.fillRect(W - padR - tw - 14, y - 8, tw + 10, 15); cx.fillStyle = '#fff'; cx.fillText(tx, W - padR - tw - 9, y + 3);
+    });
+  }
+  // EMA
+  [[e20, '#d6b26e'], [e50, '#7f9cff']].forEach(([arr, col]) => { cx.strokeStyle = col; cx.lineWidth = 1.4; cx.beginPath(); bars.forEach((b, i) => { const y = Y(arr[start + i]), x = i * cw + cw / 2; i ? cx.lineTo(x, y) : cx.moveTo(x, y); }); cx.stroke(); });
+  // candle
+  const bw = Math.max(1, cw * 0.66);
+  bars.forEach((b, i) => {
+    const x = i * cw + cw / 2, up = b.c >= b.o, col = up ? '#34d399' : '#f87171';
+    cx.strokeStyle = col; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(x, Y(b.h)); cx.lineTo(x, Y(b.l)); cx.stroke();
+    cx.fillStyle = col; const y1 = Y(Math.max(b.o, b.c)), y2 = Y(Math.min(b.o, b.c)); cx.fillRect(x - bw / 2, y1, bw, Math.max(1, y2 - y1));
+  });
+  // garis order / posisi
+  cx.textAlign = 'left';
+  lines.forEach((l) => { if (l.p < lo || l.p > hi) return; const y = Y(l.p); cx.setLineDash([5, 4]); cx.strokeStyle = l.c; cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W - padR, y); cx.stroke(); cx.setLineDash([]); cx.fillStyle = l.c; cx.fillRect(6, y - 9, cx.measureText(l.t).width + 12, 16); cx.fillStyle = '#fff'; cx.fillText(l.t, 12, y + 3); });
+  // harga terakhir
+  const last = all[all.length - 1], ly = Y(last.c), lc = last.c >= last.o ? '#22c55e' : '#ef4444';
+  if (LV.off === 0 && last.c >= lo && last.c <= hi) { cx.strokeStyle = lc; cx.setLineDash([2, 3]); cx.beginPath(); cx.moveTo(0, ly); cx.lineTo(W - padR, ly); cx.stroke(); cx.setLineDash([]); }
+  cx.fillStyle = lc; cx.fillRect(W - padR + 2, Math.min(H - padB - 9, Math.max(padT, ly - 9)), padR - 4, 18); cx.fillStyle = '#fff'; cx.fillText(n2(last.c, dg), W - padR + 7, Math.min(H - padB, Math.max(padT + 9, ly)) + 4);
+  // crosshair
+  if (LV.hover) {
+    const i = Math.min(bars.length - 1, Math.max(0, Math.floor(LV.hover.x / cw))), b = bars[i];
+    cx.strokeStyle = 'rgba(255,255,255,.25)'; cx.setLineDash([3, 3]); cx.beginPath(); cx.moveTo(i * cw + cw / 2, padT); cx.lineTo(i * cw + cw / 2, H - padB); cx.moveTo(0, LV.hover.y); cx.lineTo(W - padR, LV.hover.y); cx.stroke(); cx.setLineDash([]);
+    const pv = hi - (LV.hover.y - padT) / (H - padT - padB) * (hi - lo);
+    cx.fillStyle = '#3a2a31'; cx.fillRect(W - padR + 2, LV.hover.y - 9, padR - 4, 18); cx.fillStyle = '#fff'; cx.fillText(n2(pv, dg), W - padR + 7, LV.hover.y + 4);
+    $('ohlc').innerHTML = `${new Date(b.t * 1000 + 7 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')} · O ${n2(b.o, dg)} H ${n2(b.h, dg)} L ${n2(b.l, dg)} C <span class="${b.c >= b.o ? 'pos' : 'neg'}">${n2(b.c, dg)}</span> · <span style="color:#d6b26e">EMA20</span> <span style="color:#7f9cff">EMA50</span>`;
+  } else $('ohlc').innerHTML = `<span style="color:#d6b26e">EMA20</span> · <span style="color:#7f9cff">EMA50</span> · scroll = zoom · geser = lihat candle lama`;
+}
+requestAnimationFrame(drawCandles);
+{
+  const box = $('cc'); let drag = null;
+  box.addEventListener('mousemove', (e) => { const r = box.getBoundingClientRect(); LV.hover = { x: e.clientX - r.left, y: e.clientY - r.top }; if (drag) { const cw = (box.clientWidth - 78) / Math.min(LV.view, LV.bars.length); const d = Math.round((e.clientX - drag) / cw); if (d) { LV.off = Math.max(0, Math.min(LV.bars.length - LV.view, LV.off + d)); drag = e.clientX; } } LV.dirty = true; });
+  box.addEventListener('mouseleave', () => { LV.hover = null; drag = null; LV.dirty = true; });
+  box.addEventListener('mousedown', (e) => { drag = e.clientX; }); addEventListener('mouseup', () => { drag = null; });
+  box.addEventListener('wheel', (e) => { e.preventDefault(); LV.view = Math.max(30, Math.min(300, Math.round(LV.view * (e.deltaY > 0 ? 1.12 : 0.89)))); LV.dirty = true; }, { passive: false });
+  addEventListener('resize', () => { LV.dirty = true; });
+}
+async function loadLearn() {
+  try {
+    const L = await S.api('/api/trading/learn?limit=10');
+    $('lnN').textContent = L.total.toLocaleString('id-ID');
+    $('lnSub').textContent = `candle ${D ? D.tf : 'M15'} dipelajari · hasil dinilai ${L.horizon} candle kemudian · sumber harga pasar HFM (MT5)`;
+    if (D && D.lesson) $('lnLast').innerHTML = `${I('book', 13)} ${esc(D.lesson)}`;
+    const Z = L.zones || { rows: [], total: 0 };
+    $('znN').textContent = Z.total.toLocaleString('id-ID');
+    $('znTbl').innerHTML = Z.rows.map((r) => `<tr><td><b>${esc(r.label)}</b></td><td><span class="side ${r.trend === 'naik' ? 'b' : r.trend === 'turun' ? 's' : ''}" style="${r.trend === 'datar' ? 'background:rgba(255,255,255,.06);color:var(--ink2)' : ''}">${r.trend.toUpperCase()}</span></td><td class="m">${r.n}</td><td><div style="display:flex;gap:8px;align-items:center"><div class="bar" style="flex:1"><b style="width:${(r.bounce * 100).toFixed(0)}%"></b></div><span class="m ${r.bounce >= 0.55 ? 'pos' : r.bounce <= 0.45 ? 'neg' : ''}">${(r.bounce * 100).toFixed(0)}%</span></div></td><td class="m ${cls(r.avg_r)}">${sgn(r.avg_r)} ATR</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Belum ada data — Aurel mulai belajar setelah MT5 HFM terhubung</td></tr>';
+    const zs = (D && D.zones) || [], px = (LV.tick && LV.tick.bid) || (D && D.symbol && D.symbol.bid), dgz = (LV.tick && LV.tick.digits) || 2;
+    if (px && zs.length) {
+      const lv = zs.flatMap((z) => z.levels), ob = zs.flatMap((z) => z.obs);
+      const sup = lv.filter((x) => x.price < px).sort((a, b) => b.price - a.price)[0], res = lv.filter((x) => x.price > px).sort((a, b) => a.price - b.price)[0];
+      const obb = ob.filter((o) => o.type === 'ob_bull' && o.top < px).sort((a, b) => b.top - a.top)[0], obr = ob.filter((o) => o.type === 'ob_bear' && o.bottom > px).sort((a, b) => a.bottom - b.bottom)[0];
+      $('znNow').innerHTML = [res && `<span class="neg">Resistance ${n2(res.price, dgz)}</span> (${res.tf}, ${res.touches}x)`, sup && `<span class="pos">Support ${n2(sup.price, dgz)}</span> (${sup.tf}, ${sup.touches}x)`,
+        obr && `<span class="neg">OB Bear ${n2(obr.bottom, dgz)}–${n2(obr.top, dgz)}</span> (${obr.tf})`, obb && `<span class="pos">OB Bull ${n2(obb.bottom, dgz)}–${n2(obb.top, dgz)}</span> (${obb.tf})`].filter(Boolean).join('<br>') || 'Belum ada zona dekat harga sekarang';
+    } else $('znNow').textContent = 'Zona muncul setelah harga dari MT5 HFM tersedia.';
+    $('lnTbl').innerHTML = L.patterns.map((p) => `<tr><td><b>${esc(p.label)}</b></td><td><span class="side ${p.trend === 'naik' ? 'b' : p.trend === 'turun' ? 's' : ''}" style="${p.trend === 'datar' ? 'background:rgba(255,255,255,.06);color:var(--ink2)' : ''}">${p.trend.toUpperCase()}</span></td><td class="m">${p.n}</td><td><div style="display:flex;gap:8px;align-items:center"><div class="bar" style="flex:1"><b style="width:${(p.prob_up * 100).toFixed(0)}%"></b></div><span class="m ${p.prob_up >= 0.55 ? 'pos' : p.prob_up <= 0.45 ? 'neg' : ''}">${(p.prob_up * 100).toFixed(0)}%</span></div></td><td class="m ${cls(p.avg_r)}">${sgn(p.avg_r)} ATR</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Belum ada data</td></tr>';
+  } catch (_) {}
+}
+
+async function load() {
+  try {
+    D = await S.api('/api/trading'); render();
+    SER = await S.api('/api/trading/series?days=' + range); drawChart();
+    loadJournal(); loadCal(); loadLearn(); LV.dirty = true;
+  } catch (e) { $('banner').innerHTML = `<div class="banner sim">${esc(e.message)}</div>`; }
+}
+await load();
+await loadCandles();
+setInterval(loadCandles, 60000);
+setInterval(load, 15000);
+S.on('notify', (n) => { if (n.type === 'trade' || (n.data && n.data.trade)) setTimeout(load, 600); });
+})();
+</script>
+</body>
+</html>

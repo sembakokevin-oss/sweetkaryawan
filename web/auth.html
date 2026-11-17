@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masuk — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  body{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr}
+  .brand{position:relative;overflow:hidden;padding:48px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--line);
+    background:radial-gradient(800px 500px at 20% 10%,rgba(201,68,106,.35),transparent 60%),radial-gradient(700px 500px at 90% 100%,rgba(125,29,54,.45),transparent 60%),linear-gradient(160deg,#160c10,#0a0607)}
+  .brand .logo{display:flex;gap:12px;align-items:center}
+  .brand .logo img{width:56px;height:56px;filter:drop-shadow(0 8px 22px rgba(165,42,74,.55))}
+  .brand .logo b{display:block;font-size:17px}.brand .logo small{font:700 10px var(--mono);letter-spacing:2.4px;color:var(--gold)}
+  .brand h1{font-size:clamp(30px,3.6vw,46px);line-height:1.06;letter-spacing:-1.2px;margin:0 0 14px}
+  .brand h1 em{font-style:normal;background:linear-gradient(90deg,#e8879f,#c9446a 50%,#d6b26e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand p{color:var(--ink2);max-width:460px;margin:0}
+  .feat{display:grid;gap:12px;margin-top:28px;max-width:440px}
+  .feat div{display:flex;gap:12px;align-items:flex-start;color:var(--ink2);font-size:13.5px}
+  .feat .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--line2);color:var(--accent3)}
+  .grid3d{position:absolute;inset:auto -10% -30% -10%;height:60%;background-image:linear-gradient(rgba(201,68,106,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(201,68,106,.18) 1px,transparent 1px);background-size:44px 44px;transform:perspective(500px) rotateX(60deg);mask-image:linear-gradient(transparent,#000 60%);pointer-events:none}
+  .brand footer{color:var(--mute);font-size:12px;position:relative}
+  .side{display:grid;place-items:center;padding:32px 20px}
+  .box{width:min(420px,100%);background:linear-gradient(180deg,rgba(30,21,25,.95),rgba(18,12,15,.95));border:1px solid var(--line2);border-radius:20px;padding:30px;box-shadow:var(--shadow2)}
+  .box h2{margin:0;font-size:23px;letter-spacing:-.3px}.box .sub{color:var(--mute);margin:6px 0 20px;font-size:13.5px}
+  label{display:block;font-size:12.5px;font-weight:700;color:var(--ink2);margin:14px 0 6px}
+  .pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--mute);cursor:pointer;padding:4px}
+  .btn.full{width:100%;margin-top:18px;padding:12px}
+  .alt{margin-top:18px;text-align:center;color:var(--mute);font-size:13px}
+  .alt a{color:var(--accent3);font-weight:700}
+  .msg{margin-top:14px;padding:10px 12px;border-radius:11px;font-size:13px;display:none}
+  .msg.show{display:block}.msg.err{background:rgba(226,80,95,.1);border:1px solid rgba(226,80,95,.35);color:#f3a6ae}.msg.ok{background:rgba(63,179,127,.1);border:1px solid rgba(63,179,127,.35);color:#97e0bb}.msg.info{background:rgba(214,178,110,.08);border:1px solid rgba(214,178,110,.3);color:#e9cf98}
+  .otp{display:flex;gap:8px;justify-content:space-between;margin-top:8px}
+  .otp input{width:100%;height:56px;text-align:center;font:800 24px var(--mono);padding:0;border-radius:12px}
+  .hint{font-size:12px;color:var(--mute);margin-top:6px}
+  .strength{height:4px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}.strength i{display:block;height:100%;width:0;transition:.25s}
+  .link{background:none;border:0;color:var(--accent3);font-weight:700;cursor:pointer;padding:0;font-size:13px}
+  .link:disabled{color:var(--mute);cursor:default}
+  .row2{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .tabs{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:20px}
+  .tabs a{flex:1;text-align:center;padding:8px;border-radius:9px;font-weight:700;color:var(--ink2);font-size:13.5px}
+  .tabs a.on{background:var(--grad);color:#fff}
+  @media(max-width:900px){body{grid-template-columns:1fr}.brand{display:none}}
+</style>
+</head>
+<body>
+<section class="brand">
+  <div class="logo"><img src="/logo.svg" alt="SWEET"><div><b>SWEET AI Office</b><small>KANTOR AI · SWEETOFFICE.COM</small></div></div>
+  <div style="position:relative">
+    <h1>Kantor <em>karyawan AI</em> milik Bos Kevin.</h1>
+    <p>Pantau 16 agen bekerja, checkout & resi toko Lazada, iklan, pendapatan, dan laporan harian — semua dalam satu akun.</p>
+    <div class="feat" id="feat"></div>
+  </div>
+  <div class="grid3d"></div>
+  <footer>© SWEET AI Agent Office</footer>
+</section>
+<section class="side"><div class="box" id="box"></div></section>
+<script src="/shared.js"></script>
+<script>
+const S = SWEET, I = S.icon, esc = S.esc;
+document.getElementById('feat').innerHTML = [['lock', 'Hanya Gmail asli', 'Pendaftaran wajib memakai alamat Gmail dan diverifikasi dengan kode OTP yang dikirim ke inbox.'], ['users', 'Peran admin & pengguna', 'Admin mengendalikan semuanya. Pengguna lain dapat melihat tanpa bisa mengubah.'], ['office', 'Kantor 3D realtime', 'Lihat agen bekerja, rapat, istirahat, dan pulang mengikuti jam kantor.']]
+  .map(([ic, t, d]) => `<div>${I(ic, 17)}<span><b style="color:var(--ink)">${t}</b><br>${d}</span></div>`).join('');
+
+const box = document.getElementById('box');
+const params = new URLSearchParams(location.search);
+const next = params.get('next') && params.get('next').startsWith('/') ? params.get('next') : '/dashboard';
+let cfg = { mail: true };
+let state = { email: '', purpose: 'register' };
+
+async function post(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || 'Terjadi kendala'), j);
+  return j;
+}
+function msg(type, text) { const m = box.querySelector('.msg'); if (!m) return; m.className = `msg show ${type}`; m.innerHTML = text; }
+function busy(btn, on, label) { btn.disabled = on; if (on) { btn.dataset.t = btn.innerHTML; btn.textContent = label || 'Memproses…'; } else if (btn.dataset.t) btn.innerHTML = btn.dataset.t; }
+const pwField = (name, ph, auto) => `<div class="pw"><input type="password" name="${name}" placeholder="${ph}" autocomplete="${auto}" required><button type="button" tabindex="-1" data-eye>${I('eye', 16)}</button></div>`;
+box.addEventListener('click', (e) => { const b = e.target.closest('[data-eye]'); if (b) { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; } });
+const tabs = (on) => `<div class="tabs"><a href="/login" class="${on === 'login' ? 'on' : ''}">Masuk</a><a href="/register" class="${on === 'register' ? 'on' : ''}">Daftar</a></div>`;
+
+function strength(p) { let s = 0; if (p.length >= 8) s++; if (p.length >= 12) s++; if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++; if (/\d/.test(p)) s++; if (/[^a-zA-Z0-9]/.test(p)) s++; return s; }
+function bindStrength(form) {
+  const i = form.querySelector('[name=password]'), bar = form.querySelector('.strength i'); if (!i || !bar) return;
+  i.addEventListener('input', () => { const s = strength(i.value); bar.style.width = (s / 5 * 100) + '%'; bar.style.background = ['#e2505f', '#e2505f', '#d6b26e', '#d6b26e', '#3fb37f', '#3fb37f'][s]; });
+}
+const gmailOk = (e) => /^[a-z0-9.+]+@(gmail|googlemail)\.com$/i.test(String(e).trim());
+
+// ---------- Masuk ----------
+function viewLogin(note) {
+  history.replaceState(null, '', '/login' + location.search);
+  box.innerHTML = `${tabs('login')}<h2>Selamat datang kembali</h2><div class="sub">Masuk dengan akun Gmail yang sudah terdaftar.</div>
+    <form id="f"><label>Email Gmail</label><input type="email" name="email" placeholder="namakamu@gmail.com" autocomplete="email" required value="${esc(state.email)}">
+    <label>Kata sandi</label>${pwField('password', 'Kata sandi', 'current-password')}
+    <div class="row2"><span></span><a href="/lupa-password" class="link" style="text-decoration:none">Lupa kata sandi?</a></div>
+    <button class="btn full">${I('lock', 15)} Masuk</button><div class="msg"></div></form>
+    <div class="alt">Belum punya akun? <a href="/register">Daftar dengan Gmail</a></div>`;
+  if (note) msg(note[0], note[1]);
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const btn = f.querySelector('.btn'); busy(btn, true);
+    const d = Object.fromEntries(new FormData(f)); state.email = d.email;
+    try { await post('/api/auth/login', d); msg('ok', 'Berhasil masuk. Mengalihkan…'); location.href = next; }
+    catch (err) {
+      if (err.needVerify) { state.email = err.email; state.purpose = 'register'; try { await post('/api/auth/resend', { email: err.email, purpose: 'register' }); } catch (_) {} viewOtp('Email belum diverifikasi. Kode OTP baru dikirim ke Gmail kamu.'); return; }
+      msg('err', esc(err.message)); busy(btn, false);
+    }
+  };
+}
+
+// ---------- Daftar ----------
+function viewRegister() {
+  history.replaceState(null, '', '/register');
+  box.innerHTML = `${tabs('register')}<h2>Buat akun</h2><div class="sub">Wajib memakai Gmail asli. Kode OTP akan dikirim ke inbox Gmail kamu untuk verifikasi.</div>
+    ${cfg.mail ? '' : `<div class="msg show info">Pengiriman email belum diaktifkan oleh admin, jadi pendaftaran baru belum bisa diverifikasi. ${cfg.dev ? '(Mode uji: kode tampil di konsol server.)' : ''}</div>`}
+    <form id="f"><label>Nama</label><input name="name" placeholder="Nama lengkap" autocomplete="name" required minlength="2">
+    <label>Email Gmail</label><input type="email" name="email" placeholder="namakamu@gmail.com" autocomplete="email" required value="${esc(state.email)}">
+    <div class="hint">Hanya @gmail.com. Email lain atau email palsu tidak akan menerima kode, sehingga akun tidak bisa dibuat.</div>
+    <label>Kata sandi</label>${pwField('password', 'Minimal 8 karakter, huruf & angka', 'new-password')}<div class="strength"><i></i></div>
+    <label>Ulangi kata sandi</label>${pwField('password2', 'Ulangi kata sandi', 'new-password')}
+    <button class="btn full">${I('check', 15)} Daftar & kirim kode OTP</button><div class="msg"></div></form>
+    <div class="alt">Sudah punya akun? <a href="/login">Masuk</a></div>`;
+  const f = document.getElementById('f'); bindStrength(f);
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const d = Object.fromEntries(new FormData(f));
+    if (!gmailOk(d.email)) return msg('err', 'Gunakan alamat Gmail asli (contoh: namakamu@gmail.com).');
+    if (d.password !== d.password2) return msg('err', 'Kata sandi tidak sama.');
+    const btn = f.querySelector('.btn'); busy(btn, true, 'Mengirim kode…');
+    try { const r = await post('/api/auth/register', { name: d.name, email: d.email, password: d.password }); state.email = r.email; state.purpose = 'register'; viewOtp(); }
+    catch (err) { msg('err', esc(err.message)); busy(btn, false); }
+  };
+}
+
+// ---------- Kode OTP ----------
+let cd;
+function viewOtp(note) {
+  const reset = state.purpose === 'reset';
+  box.innerHTML = `<h2>${reset ? 'Reset kata sandi' : 'Verifikasi email'}</h2><div class="sub">Masukkan 6 digit kode yang kami kirim ke <b style="color:var(--ink)">${esc(state.email)}</b>. Cek juga folder Spam / Promosi.</div>
+    <form id="f"><div class="otp">${Array.from({ length: 6 }, (_, i) => `<input inputmode="numeric" maxlength="1" data-i="${i}" ${i ? '' : 'autofocus'}>`).join('')}</div>
+    ${reset ? `<label>Kata sandi baru</label>${pwField('password', 'Minimal 8 karakter, huruf & angka', 'new-password')}<div class="strength"><i></i></div>` : ''}
+    <button class="btn full">${I('check', 15)} ${reset ? 'Simpan kata sandi baru' : 'Verifikasi & buat akun'}</button>
+    <div class="row2"><button type="button" class="link" id="back">Ganti email</button><button type="button" class="link" id="resend">Kirim ulang kode</button></div><div class="msg"></div></form>`;
+  if (note) msg('info', note); else msg('ok', 'Kode OTP sudah dikirim. Berlaku 10 menit.');
+  const f = document.getElementById('f'); bindStrength(f);
+  const boxes = [...f.querySelectorAll('.otp input')];
+  boxes.forEach((b, i) => {
+    b.addEventListener('input', () => { b.value = b.value.replace(/\D/g, '').slice(-1); if (b.value && boxes[i + 1]) boxes[i + 1].focus(); if (boxes.every((x) => x.value) && !reset) f.requestSubmit(); });
+    b.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !b.value && boxes[i - 1]) boxes[i - 1].focus(); });
+    b.addEventListener('paste', (e) => { const t = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (t.length) { e.preventDefault(); t.split('').forEach((c, k) => { if (boxes[k]) boxes[k].value = c; }); (boxes[t.length] || boxes[5]).focus(); if (t.length === 6 && !reset) f.requestSubmit(); } });
+  });
+  const rs = document.getElementById('resend');
+  const tick = (s) => { clearInterval(cd); rs.disabled = true; let n = s; rs.textContent = `Kirim ulang (${n})`; cd = setInterval(() => { n--; if (n <= 0) { clearInterval(cd); rs.disabled = false; rs.textContent = 'Kirim ulang kode'; } else rs.textContent = `Kirim ulang (${n})`; }, 1000); };
+  tick(60);
+  rs.onclick = async () => { try { await post('/api/auth/resend', { email: state.email, purpose: state.purpose }); msg('ok', 'Kode baru sudah dikirim.'); tick(60); } catch (err) { msg('err', esc(err.message)); } };
+  document.getElementById('back').onclick = () => (reset ? viewForgot() : viewRegister());
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const code = boxes.map((b) => b.value).join('');
+    if (code.length !== 6) return msg('err', 'Masukkan 6 digit kode.');
+    const btn = f.querySelector('.btn'); busy(btn, true);
+    try {
+      if (reset) await post('/api/auth/reset', { email: state.email, code, password: f.password.value });
+      else await post('/api/auth/verify', { email: state.email, code });
+      msg('ok', reset ? 'Kata sandi diperbarui. Mengalihkan…' : 'Akun berhasil dibuat. Mengalihkan…');
+      setTimeout(() => { location.href = next; }, 700);
+    } catch (err) { msg('err', esc(err.message)); busy(btn, false); boxes.forEach((b) => { b.value = ''; }); boxes[0].focus(); }
+  };
+}
+
+// ---------- Lupa kata sandi ----------
+function viewForgot() {
+  history.replaceState(null, '', '/lupa-password');
+  box.innerHTML = `<h2>Lupa kata sandi</h2><div class="sub">Masukkan Gmail akunmu. Kami kirim kode OTP untuk membuat kata sandi baru.</div>
+    <form id="f"><label>Email Gmail</label><input type="email" name="email" placeholder="namakamu@gmail.com" required value="${esc(state.email)}">
+    <button class="btn full">${I('refresh', 15)} Kirim kode</button><div class="msg"></div></form>
+    <div class="alt"><a href="/login">Kembali ke halaman masuk</a></div>`;
+  const f = document.getElementById('f');
+  f.onsubmit = async (e) => {
+    e.preventDefault(); const email = f.email.value.trim();
+    if (!gmailOk(email)) return msg('err', 'Gunakan alamat Gmail.');
+    const btn = f.querySelector('.btn'); busy(btn, true, 'Mengirim…');
+    try { await post('/api/auth/forgot', { email }); state.email = email; state.purpose = 'reset'; viewOtp('Jika email terdaftar, kode OTP sudah dikirim ke inbox Gmail tersebut.'); }
+    catch (err) { msg('err', esc(err.message)); busy(btn, false); }
+  };
+}
+
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href="/login"],a[href="/register"],a[href="/lupa-password"]'); if (!a) return;
+  e.preventDefault(); ({ '/login': () => viewLogin(), '/register': viewRegister, '/lupa-password': viewForgot })[a.getAttribute('href')]();
+});
+
+(async () => {
+  try { cfg = await (await fetch('/api/auth/config')).json(); } catch (_) {}
+  const p = location.pathname;
+  if (p === '/register') viewRegister(); else if (p === '/lupa-password') viewForgot(); else viewLogin();
+})();
+</script>
+</body>
+</html>

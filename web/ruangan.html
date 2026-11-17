@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruang Agen — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<script type="importmap">{ "imports": { "three": "/vendor/three/build/three.module.js" } }</script>
+<style>
+  html,body{height:100%}
+  body{overflow:hidden}
+  #wrap{position:fixed;top:var(--nav);left:0;right:0;bottom:0;display:grid;grid-template-rows:auto 1fr;gap:12px;padding:14px 16px 16px}
+  #strip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scroll-behavior:smooth}
+  #strip button{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.035);cursor:pointer;transition:.2s;font-weight:700;font-size:12.5px;position:relative}
+  #strip button:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  #strip button.on{background:var(--grad);color:#fff;border-color:transparent}
+  #strip button .avatar{width:30px;height:30px;border-radius:9px;font-size:15px}
+  #strip button em{font-style:normal;font:700 10px var(--mono);color:var(--accent)}
+  #strip button.on em{color:#ffb37a}
+  #strip button .b{position:absolute;top:4px;left:30px;width:9px;height:9px;border-radius:50%;background:#6b5f63;border:2px solid #150e11}
+  #strip button .b.on{background:var(--green)}
+  #main{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);gap:14px;min-height:0}
+  #view{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#1a1216}
+  #stage{position:absolute;inset:0}
+  .arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);background:rgba(18,12,15,.9);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+  .arrow:hover{transform:translateY(-50%) scale(1.08)}
+  #pv{left:14px}#nx{right:14px}
+  #vtitle{position:absolute;left:16px;top:14px;z-index:5;background:rgba(18,12,15,.9);border:1px solid var(--line2);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+  #vtitle small{display:block;font:700 10px var(--mono);letter-spacing:2px;color:var(--mute)}
+  #vtitle b{font:700 15px var(--mono);letter-spacing:1.5px}
+  #vstatus{position:absolute;right:16px;top:14px;z-index:5}
+  #count{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;font:700 11px var(--mono);letter-spacing:2px;background:rgba(18,12,15,.9);padding:5px 12px;border-radius:99px;border:1px solid var(--line)}
+  #side{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  .slide-in-r{animation:sr .45s cubic-bezier(.2,.9,.3,1)}.slide-in-l{animation:sl .45s cubic-bezier(.2,.9,.3,1)}
+  @keyframes sr{from{opacity:0;transform:translateX(40px)}}@keyframes sl{from{opacity:0;transform:translateX(-40px)}}
+  .prof{padding:18px;background:linear-gradient(140deg,color-mix(in srgb,var(--ac) 28%,transparent) 0%,transparent 65%)}
+  .prof .row{display:flex;gap:14px;align-items:center}
+  .prof .ph{border-radius:22px}
+  .prof h2{margin:0;font-size:22px}.prof .role{color:var(--ink2);font-weight:700}
+  .prof .no{font:700 11px var(--mono);letter-spacing:2px;color:var(--accent)}
+  .prof p{margin:12px 0 0;color:var(--ink2)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 18px 16px}
+  .kpis div{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center}.kpis b{display:block;font-size:18px}.kpis span{font-size:10.5px;color:var(--mute);font-weight:700}
+  .now{padding:14px 16px}
+  .now small{font:700 10px var(--mono);letter-spacing:2px;color:var(--mute)}
+  .now .t{font-weight:700;font-size:14.5px;margin-top:4px}
+  .now .bar{height:5px;border-radius:5px;background:var(--panel2);overflow:hidden;margin-top:10px}
+  .now .bar i{display:block;height:100%;width:40%;background:var(--ac);border-radius:5px;animation:ld 1.4s ease-in-out infinite}
+  @keyframes ld{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+  .task{padding:14px 16px}
+  .task form{display:flex;gap:8px}
+  .chips2{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chips2 button{border:1px dashed var(--line2);background:rgba(255,255,255,.03);border-radius:99px;padding:4px 10px;font-size:11.5px;cursor:pointer;font-weight:600}
+  .chips2 button:hover{border-color:var(--accent2);color:var(--accent3)}
+  .answer{margin-top:12px;background:rgba(214,178,110,.08);border:1px solid rgba(214,178,110,.3);border-radius:12px;padding:10px 12px;font-size:13px;max-height:260px;overflow:auto}
+  .tabs{display:flex;gap:4px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
+  .tabs button{border:0;background:none;padding:8px 12px;font-weight:700;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent}
+  .tabs button.on{color:var(--ink);border-color:var(--accent)}
+  .list{padding:8px 14px 14px;max-height:none}
+  .it{padding:10px 4px;border-bottom:1px solid var(--line);font-size:13px}
+  .it:last-child{border:0}
+  .it .h{display:flex;gap:8px;align-items:center}
+  .it .h b{flex:1;font-weight:700}
+  .it small{color:var(--mute);font-size:11.5px}
+  .it details summary{cursor:pointer;color:var(--accent2);font-size:12px;font-weight:700;margin-top:4px}
+  .it .res{margin-top:6px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;max-height:280px;overflow:auto}
+  @media (max-width:1000px){body{overflow:auto}#wrap{position:static;padding-top:calc(var(--nav) + 12px)}#main{grid-template-columns:1fr}#view{height:56vh}}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div id="wrap">
+  <div id="strip"></div>
+  <div id="main">
+    <div id="view">
+      <div id="stage"></div>
+      <div id="vtitle"><small>RUANG AGEN</small><b id="vt">—</b></div>
+      <div id="vstatus"></div>
+      <button class="arrow" id="pv" title="Sebelumnya (←)"></button>
+      <button class="arrow" id="nx" title="Berikutnya (→)"></button>
+      <div id="count">1 / 15</div>
+    </div>
+    <div id="side"></div>
+  </div>
+</div>
+<script src="/shared.js"></script>
+<script type="module">
+import { createOffice } from '/js/office3d.js';
+const S = window.SWEET;
+S.nav('ruangan');
+const $ = (id) => document.getElementById(id);
+const QUICK = {
+  pm: ['Pecah ide aplikasi kasir UMKM jadi daftar fitur', 'Buat user story untuk fitur Login & Payment'],
+  arch: ['Rancang struktur folder data/ domain/ presentation/ lib/ untuk aplikasi chat', 'Jelaskan aturan dependensi antar lapisan'],
+  design: ['Buat alur & tampilan onboarding sampai login', 'Desain state loading/empty/error untuk halaman Chat'],
+  mobile: ['Contoh kode layar Login mengikuti kontrak API /auth/login', 'Struktur modul Flutter untuk fitur Notif'],
+  backend: ['Tulis kontrak API Login, Chat, Payment', 'Contoh endpoint POST /auth/login dengan validasi'],
+  db: ['Cek kesehatan database SWEET', 'Rancang tabel users, chats, messages tanpa data dobel'],
+  qa: ['Buat skenario uji fitur Payment + edge case', 'Daftar bug yang sering muncul di fitur Login'],
+  sec: ['Audit celah keamanan endpoint login', 'Checklist keamanan penyimpanan token di mobile'],
+  devops: ['Cek status sistem', 'Buat pipeline CI/CD GitHub Actions untuk Node.js'],
+  lead: ['Review standar kode tim dan beri catatan', 'Apa saja kriteria pekerjaan yang harus dikembalikan?'],
+  cs: ['Cek chat pembeli dan ringkas', 'Buat template balasan untuk pertanyaan stok'],
+  order: ['Cek pesanan yang belum diproses', 'Daftar resi yang masih aktif'],
+  stock: ['Cek produk yang stoknya menipis', 'Tampilkan semua produk dengan harga & stok'],
+  ads: ['Buat proposal iklan untuk produk terlaris', 'Buat promo diskon untuk produk yang stoknya banyak'],
+  analis: ['Laporan penjualan 7 hari terakhir', 'Siapa pembeli teratas bulan ini?']
+};
+
+let agents = await S.api('/api/agents');
+agents = agents.filter((a) => a.type === 'builtin').sort((a, b) => a.no - b.no).concat(agents.filter((a) => a.type === 'recruit'));
+let idx = Math.max(0, agents.findIndex((a) => a.key === location.hash.slice(1)));
+let tab = 'tugas', answer = '', dir = 'r';
+
+const office = await createOffice($('stage'), { view: agents[idx] && agents[idx].type !== 'recruit' ? `room_${agents[idx].job}` : 'bullpen', onAgentClick: (key) => { const i = agents.findIndex((a) => a.key === key); if (i >= 0) go(i); } });
+
+function strip() {
+  $('strip').innerHTML = agents.map((a, i) => `<button class="${i === idx ? 'on' : ''}" data-i="${i}">${S.avatar(a, 30)}<span class="b ${a.busy || a.step ? 'on' : ''}"></span><span>${a.no ? `<em>#${a.no}</em><br>` : ''}${S.esc(a.name)}</span></button>`).join('');
+  const on = $('strip').querySelector('.on'); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+$('strip').onclick = (e) => { const b = e.target.closest('button'); if (b) go(Number(b.dataset.i)); };
+function go(i) {
+  dir = i < idx ? 'l' : 'r';
+  idx = (i + agents.length) % agents.length; answer = '';
+  history.replaceState(null, '', '#' + agents[idx].key);
+  const a = agents[idx];
+  office.focus(a.type !== 'recruit' ? `room_${a.job}` : 'bullpen');
+  office.select(a.key);
+  strip(); render(true);
+}
+$('pv').innerHTML = S.icon('play', 16).replace('<path', '<path transform="rotate(180 12 12)"'); $('nx').innerHTML = S.icon('play', 16);
+$('pv').onclick = () => go(idx - 1); $('nx').onclick = () => go(idx + 1);
+addEventListener('keydown', (e) => { if (e.target.closest('input,textarea')) return; if (e.key === 'ArrowLeft') go(idx - 1); if (e.key === 'ArrowRight') go(idx + 1); });
+let tx = null; $('view').addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+$('view').addEventListener('touchend', (e) => { if (tx === null) return; const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 70) go(idx + (d < 0 ? 1 : -1)); tx = null; });
+
+async function render(anim) {
+  const a = agents[idx]; if (!a) return;
+  const d = await S.api('/api/agent/' + encodeURIComponent(a.key));
+  if (agents[idx].key !== a.key) return;
+  const live = office.agent(a.key) || d.agent;
+  $('vt').textContent = `${a.no ? `#${a.no} ` : ''}${a.role.toUpperCase()}`;
+  $('count').textContent = `${idx + 1} / ${agents.length}`;
+  $('vstatus').innerHTML = live.busy ? '<span class="tag running" style="font-size:12px;padding:5px 12px"><span class="dotlive"></span> Sedang bekerja</span>' : (live.step ? `<span class="tag running" style="font-size:12px;padding:5px 12px">${S.esc(live.step_label)}</span>` : '<span class="tag" style="font-size:12px;padding:5px 12px">Idle</span>');
+  const side = $('side');
+  side.style.setProperty('--ac', a.color || '#a52a4a');
+  const C = { done: '#2f9e5b', running: '#3b7dd8', failed: '#d64545' };
+  const listHtml = tab === 'tugas'
+    ? d.tasks.map((t) => `<div class="it"><div class="h"><span class="tag ${t.status}">${t.status === 'done' ? 'selesai' : t.status === 'running' ? 'jalan' : 'gagal'}</span><b>${S.esc(t.title)}</b></div><small>${S.timeAgo(t.ts)} · sumber: ${t.source || '-'}</small>${t.result ? `<details><summary>Lihat hasil</summary><div class="res md">${S.md(t.result)}</div></details>` : ''}</div>`).join('')
+    : tab === 'aktivitas'
+      ? d.activity.map((x) => `<div class="it"><div class="h"><span class="tag">${S.esc(x.kind)}</span><b style="font-weight:600">${S.esc(x.text)}</b></div><small>${new Date(x.ts).toLocaleString('id-ID')}</small></div>`).join('')
+      : d.deliverables.map((x) => `<div class="it"><div class="h"><span class="tag ${x.status}">${x.status}</span><b>Proyek #${x.project_id}: ${S.esc(x.kind)}</b></div><small>putaran ${x.round} · ${S.timeAgo(x.ts)}</small>${x.review ? `<div class="res" style="background:rgba(226,80,95,.1)">Review Tech Lead: ${S.esc(x.review)}</div>` : ''}<details><summary>Lihat hasil</summary><div class="res md">${S.md(x.content)}</div></details></div>`).join('');
+  side.innerHTML = `
+    <div class="card ${anim ? 'slide-in-' + dir : ''}" style="overflow:hidden">
+      <div class="prof"><div class="row">${S.avatar(d.agent, 76).replace('class="avatar"', 'class="avatar ph"')}
+        <div><div class="no">${a.no ? `AGENT #${a.no}` : 'REKRUTAN'} · ${a.dept === 'dev' ? 'TIM PRODUK & ENGINEERING' : a.dept === 'toko' ? 'TIM TOKO LAZADA' : a.dept === 'trading' ? 'TIM TRADING · TAMBANG EMAS · 24 JAM' : 'TIM BARU'}</div><h2>${S.esc(a.name)}</h2><div class="role">${S.esc(a.role)}</div></div></div>
+        <p>${S.esc(a.specialty)}</p></div>
+      <div class="kpis"><div><b>${d.stats.today}</b><span>Hari ini</span></div><div><b>${d.stats.done}</b><span>Selesai</span></div><div><b>${d.stats.failed}</b><span>Gagal</span></div><div><b>${d.deliverables.length}</b><span>Hasil proyek</span></div></div>
+    </div>
+    <div class="card now ${anim ? 'slide-in-' + dir : ''}"><small>${live.busy ? 'SEDANG MENGERJAKAN' : live.step ? 'ALUR KERJA MEJA' : 'STATUS & PIKIRAN'}</small><div class="t">${S.esc(live.busy ? live.current_task : live.step_label || live.thought)}</div>${live.flag ? `<div class="box ${live.flag === '!' ? 'bad' : 'warm'}" style="margin-top:8px;font-size:12.5px"><b>${live.flag === '!' ? '! Mendesak' : '$ Promo habis'}</b> — ${S.esc(live.flag_note)}</div>` : ''}${live.tool_used ? `<div class="muted" style="font-size:12px;margin-top:2px">memakai ${S.esc(live.tool_used)}</div>` : ''}${live.busy ? '<div class="bar"><i></i></div>' : ''}</div>
+    <div class="card task ${anim ? 'slide-in-' + dir : ''}">
+      <form id="f"><input id="q" placeholder="Perintah untuk ${S.esc(a.name)}…" autocomplete="off"><button class="btn accent">Kirim</button></form>
+      <div class="chips2">${(QUICK[a.job] || ['Buat laporan singkat pekerjaan hari ini']).map((q) => `<button type="button" data-q="${S.esc(q)}">${S.esc(q)}</button>`).join('')}</div>
+      ${answer ? `<div class="answer md">${S.md(answer)}</div>` : ''}
+    </div>
+    <div class="card ${anim ? 'slide-in-' + dir : ''}">
+      <div class="tabs">${[['tugas', `Tugas (${d.tasks.length})`], ['aktivitas', 'Aktivitas'], ['hasil', `Hasil proyek (${d.deliverables.length})`]].map(([k, l]) => `<button data-t="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="list">${listHtml || '<div class="empty">Belum ada data</div>'}</div>
+    </div>`;
+  side.querySelector('.tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) { tab = b.dataset.t; render(false); } };
+  side.querySelector('.chips2').onclick = (e) => { const b = e.target.closest('button'); if (b) { $('q').value = b.dataset.q; $('q').focus(); } };
+  $('f').onsubmit = async (e) => {
+    e.preventDefault(); const q = $('q').value.trim(); if (!q) return;
+    const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Bekerja…';
+    try { const r = await S.api('/api/agent/task', { body: { key: a.key, text: q } }); answer = r.answer; }
+    catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); }
+    render(false);
+  };
+}
+strip(); go(idx);
+let pending = null;
+const refresh = () => { clearTimeout(pending); pending = setTimeout(() => { if (!document.activeElement?.closest('#f')) render(false); }, 400); };
+S.on('agent', (d) => { const a = agents.find((x) => x.key === d.key); if (a) { Object.assign(a, d); strip(); } if (agents[idx]?.key === d.key) refresh(); });
+S.on('activity', (r) => { if (agents[idx]?.key === r.agent) refresh(); });
+S.on('roster', async () => { const all = await S.api('/api/agents'); agents = all.filter((a) => a.type === 'builtin').sort((a, b) => a.no - b.no).concat(all.filter((a) => a.type === 'recruit')); strip(); });
+</script>
+</body>
+</html>

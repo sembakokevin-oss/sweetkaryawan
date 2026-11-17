@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  body{overflow:hidden}
+  #side{position:fixed;top:var(--nav);left:0;bottom:0;width:240px;background:linear-gradient(180deg,rgba(22,14,18,.96),rgba(12,8,10,.96));border-right:1px solid var(--line);padding:14px 10px 20px;overflow:auto}
+  #side h6{margin:16px 12px 6px;color:var(--mute);font:700 10px var(--mono);letter-spacing:2px;text-transform:uppercase}
+  #side a{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:11px;color:var(--ink2);font-weight:700;margin-bottom:2px;cursor:pointer;transition:background .15s}
+  #side a:hover{background:rgba(255,255,255,.05);color:var(--ink)}
+  #side a.on{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(125,29,54,.4)}
+  #side .badge{margin-left:auto;background:var(--accent2);color:#fff;border-radius:99px;padding:0 7px;font-size:11px;font-weight:800;min-width:20px;text-align:center}
+  #side .badge:empty{display:none}
+  #side .clk{margin:8px 6px 4px;padding:12px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+  #side .clk b{font:800 20px var(--mono)}#side .clk small{display:block;color:var(--mute);font-size:11px;margin-top:2px}
+  #main{position:fixed;top:var(--nav);left:240px;right:0;bottom:0;overflow:auto;padding:24px 28px 80px}
+  .ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .ph h2{margin:0;font-size:24px;letter-spacing:-.3px}.ph p{margin:3px 0 0;color:var(--mute)}
+  .ph .act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .grid{display:grid;gap:14px}
+  .kpis{grid-template-columns:repeat(auto-fill,minmax(195px,1fr));margin-bottom:16px}
+  .kpi{padding:15px 16px;position:relative;overflow:hidden}
+  .kpi .l{color:var(--mute);font-size:11.5px;font-weight:700}
+  .kpi b{display:block;font-size:23px;margin-top:4px;letter-spacing:-.3px;font-family:var(--mono)}
+  .kpi small{font-size:11.5px;font-weight:600}
+  .kpi .ki{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+  .kpi.gold b{color:var(--gold)}
+  .kpi.flash{animation:flash 1.2s}
+  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(214,178,110,.6)}100%{box-shadow:0 0 0 14px rgba(214,178,110,0)}}
+  .up{color:var(--green)}.down{color:var(--red)}
+  .two{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+  .half{grid-template-columns:1fr 1fr}
+  @media(max-width:1200px){.two,.half{grid-template-columns:1fr}}
+  @media(max-width:860px){#side{width:62px;padding:10px 6px}#side a span,#side h6,#side .badge,#side .clk{display:none}#side a{justify-content:center}#main{left:62px;padding:18px 14px 80px}}
+  .card{padding:16px}
+  .card h3{margin:0 0 12px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .card h3 .r{margin-left:auto;display:flex;gap:6px;font-weight:600}
+  table{width:100%;border-collapse:collapse}
+  th{color:var(--mute);font:700 10.5px var(--mono);text-transform:uppercase;letter-spacing:1.2px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:13px}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:rgba(255,255,255,.025)}
+  tr.new td{animation:rowNew 2.4s ease}
+  @keyframes rowNew{0%{background:rgba(214,178,110,.18)}100%{background:transparent}}
+  .tw{overflow:auto}
+  .resi{font:700 12px var(--mono);background:rgba(91,141,239,.1);border:1px dashed rgba(91,141,239,.45);color:#a9c3f7;border-radius:7px;padding:3px 8px;cursor:pointer;white-space:nowrap}
+  .resi:hover{background:rgba(91,141,239,.2)}
+  .row{display:flex;gap:10px;align-items:center}
+  .feed{max-height:430px;overflow:auto}
+  .fi{display:flex;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);animation:fadeIn .5s}
+  .fi:last-child{border:0}
+  .fi .e{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;color:var(--c,var(--ink2));background:color-mix(in srgb,var(--c,#888) 14%,transparent)}
+  .fi b{font-size:13px;display:block}.fi span{color:var(--mute);font-size:12px;white-space:pre-line}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}}
+  .agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px}
+  .ac{padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;border-top:3px solid var(--c)}
+  .ac:hover{transform:translateY(-3px);box-shadow:var(--shadow2)}
+  .ac .top{display:flex;gap:10px;align-items:center}
+  .ac .top b{display:block}.ac .top small{color:var(--mute);font-weight:700;font-size:11.5px}
+  .ac .st{margin-top:10px;font-size:12.5px;color:var(--ink2);min-height:36px}
+  .ac .ft{display:flex;gap:6px;margin-top:10px;align-items:center;font-size:11.5px;color:var(--mute)}
+  .flagc{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font:900 11px var(--mono)}
+  .flagc.d{background:#d6a73c;color:#4a3205}.flagc.u{background:#e2364b;color:#fff;animation:urgentPulse 1s infinite}
+  @keyframes urgentPulse{0%{box-shadow:0 0 0 0 rgba(226,54,75,.7)}70%{box-shadow:0 0 0 8px rgba(226,54,75,0)}100%{box-shadow:0 0 0 0 rgba(226,54,75,0)}}
+  .mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+  .mini div{display:flex;gap:8px;align-items:center;padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:12px;font-weight:700}
+  .mini em{font-style:normal;font-weight:600;color:var(--mute);display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px}
+  .adc{padding:14px;border-left:3px solid var(--accent2)}
+  .adc h4{margin:0 0 4px}
+  .adc .copy{background:rgba(255,255,255,.035);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:12.5px;font-style:italic;color:var(--ink2)}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .stp{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:11.5px;font-weight:700;display:flex;gap:6px;align-items:center}
+  .stp.done{border-color:rgba(63,179,127,.4);color:#86dcb2}.stp.run{border-color:rgba(214,178,110,.45);color:#e9cf98}.stp.ret{border-color:rgba(226,80,95,.45);color:#f19aa4}
+  .stp.run::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1s infinite}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:220px;padding-top:10px}
+  .bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;min-width:0;position:relative}
+  .bars .stack{width:100%;max-width:44px;display:flex;flex-direction:column-reverse;border-radius:8px 8px 3px 3px;overflow:hidden}
+  .bars .stack i{display:block}
+  .bars .b small{font:600 10px var(--mono);color:var(--mute);white-space:nowrap}
+  .bars .b .v{font:700 10px var(--mono);color:var(--ink2);white-space:nowrap}
+  .bars .b:hover .tip{display:block}
+  .tip{display:none;position:absolute;bottom:100%;background:#0d0809;border:1px solid var(--line2);color:#fff;padding:6px 9px;border-radius:8px;font-size:11px;white-space:nowrap;z-index:3}
+  .legend{display:flex;gap:12px;font-size:12px;color:var(--ink2);font-weight:600;flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .seg{display:inline-flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{border:0;background:none;padding:4px 10px;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer;color:var(--ink2)}
+  .seg button.on{background:var(--grad);color:#fff}
+  .switch{position:relative;width:44px;height:24px;border-radius:99px;background:rgba(255,255,255,.12);cursor:pointer;transition:.2s;flex:0 0 auto;border:0}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+  .switch.on{background:var(--accent2)}.switch.on::after{left:23px}
+  .setrow{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .setrow:last-child{border:0}.setrow b{display:block}.setrow small{color:var(--mute)}
+  .chat{display:grid;grid-template-columns:280px 1fr;gap:12px;min-height:420px}
+  .sess{border-right:1px solid var(--line);padding-right:10px}
+  .sess div{padding:10px;border-radius:10px;cursor:pointer}.sess div:hover,.sess div.on{background:rgba(255,255,255,.05)}
+  .msgs{display:flex;flex-direction:column;gap:8px;min-height:300px;max-height:460px;overflow:auto;padding:6px}
+  .msg{max-width:75%;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.06);font-size:13px}
+  .msg.me{align-self:flex-end;background:rgba(165,42,74,.3)}
+  .drawer{position:fixed;top:var(--nav);right:0;bottom:0;width:min(540px,100vw);background:linear-gradient(180deg,#1c1317,#120c0f);border-left:1px solid var(--line2);box-shadow:var(--shadow2);z-index:40;transform:translateX(105%);transition:transform .4s cubic-bezier(.2,.9,.3,1);display:flex;flex-direction:column}
+  .drawer.open{transform:none}
+  .drawer .hd{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}
+  .drawer .bd{padding:16px 18px;overflow:auto;flex:1}
+  .qchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .qchips button{border:1px dashed var(--line2);background:rgba(255,255,255,.03);border-radius:99px;padding:5px 11px;font-size:12px;cursor:pointer;font-weight:600}
+  .qchips button:hover{border-color:var(--accent2);color:var(--accent3)}
+  .drop{border:2px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;color:var(--mute);cursor:pointer;transition:.2s;display:flex;gap:8px;align-items:center;justify-content:center}
+  .drop:hover,.drop.over{border-color:var(--accent2);background:rgba(165,42,74,.08);color:var(--accent3)}
+  .donut{display:flex;gap:18px;align-items:center}
+  label.f{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin:10px 0 5px}
+  details summary{cursor:pointer;font-size:12px;color:var(--accent3);font-weight:700}
+  .res{font-size:12.5px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px;max-height:300px;overflow:auto}
+  .rep{display:grid;grid-template-columns:240px 1fr;gap:14px}
+  @media(max-width:1000px){.rep{grid-template-columns:1fr}}
+  .days div{padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;border:1px solid transparent}
+  .days div:hover{background:rgba(255,255,255,.04)}.days div.on{border-color:rgba(201,68,106,.5);background:rgba(165,42,74,.12)}
+  .repgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<aside id="side"></aside>
+<main id="main"></main>
+<div class="drawer" id="drawer"></div>
+<script src="/shared.js"></script>
+<script>
+const S = SWEET; S.nav('dashboard');
+const $ = (s, r = document) => r.querySelector(s);
+const esc = S.esc, rp = S.rp, I = S.icon;
+const MENU = [
+  ['UTAMA'], ['ringkasan', 'chart', 'Ringkasan'], ['perintah', 'target', 'Pusat Perintah'], ['laporan', 'file', 'Laporan Harian', 'b-lap'],
+  ['TOKO LAZADA'], ['pesanan', 'cart', 'Pesanan & Resi', 'b-pesanan'], ['produk', 'bag', 'Produk & Stok', 'b-stok'], ['iklan', 'megaphone', 'Iklan & Promo', 'b-iklan'], ['chat', 'chat', 'Chat Pembeli'],
+  ['KEUANGAN'], ['pendapatan', 'wallet', 'Pendapatan & Lynk.id'],
+  ['TIM'], ['agen', 'users', 'Tim Agen', 'b-urgent'], ['proyek', 'rocket', 'Proyek 10 Agen', 'b-proyek'], ['rapat', 'mic', 'Rapat & Notulen', 'b-rapat'], ['aktivitas', 'list', 'Log Aktivitas'],
+  ['SISTEM'], ['sistem', 'gear', 'Sistem & Integrasi'], ['pengguna', 'shield', 'Pengguna'], ['akun', 'user', 'Akun saya']
+];
+const STATUS_ID = { pending: 'Menunggu', packed: 'Dikemas', ready_to_ship: 'Siap kirim', shipped: 'Dikirim', delivered: 'Sampai', canceled: 'Batal', failed: 'Gagal', returned: 'Retur', unpaid: 'Belum bayar' };
+let AG = {}, page = 'ringkasan', days = 7, orderFilter = '';
+const empty = (t) => `<div class="empty">${t}</div>`;
+const tag = (s, label) => `<span class="tag ${esc(s)}">${esc(label || STATUS_ID[s] || s)}</span>`;
+const agentName = (k) => (AG[k] ? AG[k].name : k === 'kevin' ? 'Kevin' : k === 'sistem' ? 'Sistem' : k === 'perusahaan' ? 'Perusahaan' : esc(k));
+const fail = (e) => S.toast({ type: 'warn', title: 'Gagal', text: e.message });
+async function busy(btn, fn) { const t = btn.innerHTML; btn.disabled = true; btn.textContent = 'Memproses…'; try { return await fn(); } catch (e) { fail(e); } finally { btn.disabled = false; btn.innerHTML = t; } }
+const flagIcon = (a) => (a.flag ? `<span class="flagc ${a.flag === '!' ? 'u' : 'd'}" title="${esc(a.flag_note)}">${a.flag === '!' ? '!' : '$'}</span>` : '');
+
+function sidebar() {
+  $('#side').innerHTML = `<div class="clk"><b id="sclk">--:--</b><small id="sph">Jam kantor</small></div>` +
+    MENU.map((m) => m.length === 1 ? `<h6>${m[0]}</h6>` : `<a data-p="${m[0]}" class="${page === m[0] ? 'on' : ''}">${I(m[1], 17)}<span>${m[2]}</span>${m[3] ? `<span class="badge" id="${m[3]}"></span>` : ''}</a>`).join('');
+  badges();
+}
+setInterval(() => { const c = $('#sclk'); if (c) c.textContent = S.simTime(true); }, 250);
+S.on('clock', (c) => { const p = $('#sph'); if (p) p.textContent = `${c.label}${c.speed > 1 ? ' • timelapse ' + c.speed + 'x' : ''}`; });
+$('#side').onclick = (e) => { const a = e.target.closest('a[data-p]'); if (a) location.hash = a.dataset.p; };
+async function badges() {
+  try {
+    const k = (await S.api('/api/stats?days=1&orders=1')).kpi;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v || ''; };
+    set('b-pesanan', k.pending_orders); set('b-iklan', k.ads_proposed); set('b-stok', k.low_stock);
+    set('b-urgent', Object.values(AG).filter((a) => a.flag === '!').length);
+    const h = S.health || {}; set('b-proyek', h.project ? '•' : ''); set('b-rapat', h.meeting ? '•' : '');
+  } catch (_) {}
+}
+
+const P = {};
+function kpi(ic, l, v, sub, c, id, cls = '') { return `<div class="card kpi ${cls}" style="--c:${c}" ${id ? `id="${id}"` : ''}><div class="ki">${I(ic, 17)}</div><div class="l">${l}</div><b>${v}</b><small class="muted">${sub}</small></div>`; }
+const feedRow = (n) => `<div class="fi" style="--c:${S.TYPE_COLOR[n.type] || '#aaa'}"><div class="e">${I(S.TYPE_ICON[n.type] || 'bell', 16)}</div><div><b>${esc(n.title)}</b><span>${esc(String(n.text || '').slice(0, 160))}</span><span class="mono" style="font-size:10.5px;display:block">${S.timeAgo(n.ts)}</span></div></div>`;
+function chart(rows) {
+  const max = Math.max(1, ...rows.map((r) => r.total));
+  const C = { lazada: '#c9446a', lynk: '#9b7bdb', manual: '#d6b26e' };
+  const short = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'jt' : n >= 1e3 ? Math.round(n / 1e3) + 'rb' : Math.round(n));
+  return `<div class="legend"><span><i style="background:${C.lazada}"></i>Lazada</span><span><i style="background:${C.lynk}"></i>Lynk.id</span><span><i style="background:${C.manual}"></i>Lainnya</span><span class="muted" style="margin-left:auto">Total <b class="mono" style="color:var(--gold)">${rp(rows.reduce((s, r) => s + r.total, 0))}</b> · ${rows.reduce((s, r) => s + r.orders, 0)} pesanan</span></div>
+  <div class="bars">${rows.map((r) => `<div class="b"><div class="tip">${r.date}<br>Lazada ${rp(r.lazada)}<br>Lynk ${rp(r.lynk)}<br>Lain ${rp(r.manual)}<br>${r.orders} pesanan · ${r.buyers} pembeli</div><span class="v">${r.total ? short(r.total) : ''}</span>
+    <div class="stack" style="height:${Math.max(2, r.total / max * 170)}px">${['lazada', 'lynk', 'manual'].map((k) => r[k] ? `<i style="background:${C[k]};height:${r[k] / r.total * 100}%"></i>` : '').join('')}</div>
+    <small>${rows.length > 14 ? r.date.slice(8) : r.date.slice(5).replace('-', '/')}</small></div>`).join('')}</div>`;
+}
+
+// ---------- Ringkasan ----------
+P.ringkasan = async () => {
+  const [s, resi] = await Promise.all([S.api(`/api/stats?days=${days}&orders=8`), S.api('/api/resi?limit=6')]);
+  const k = s.kpi;
+  const diff = k.yesterday_revenue ? Math.round((k.today_revenue - k.yesterday_revenue) / k.yesterday_revenue * 100) : null;
+  const proposed = s.ads.filter((a) => a.status === 'proposed');
+  const urgent = Object.values(AG).filter((a) => a.flag);
+  return `<div class="ph"><div><h2>Selamat datang, Bos Kevin</h2><p>Kondisi toko & tim SWEET secara langsung · ${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p></div>
+    <div class="act"><a class="btn ghost sm" href="/office">${I('office', 15)} Lihat Office</a><button class="btn sm" data-act="sync">${I('refresh', 15)} Sinkron Lazada</button></div></div>
+  <div class="grid kpis">
+    ${kpi('coin', 'Pendapatan hari ini', rp(k.today_revenue), diff === null ? 'kemarin ' + rp(k.yesterday_revenue) : `<span class="${diff >= 0 ? 'up' : 'down'}">${diff >= 0 ? '▲' : '▼'} ${Math.abs(diff)}%</span> vs kemarin`, 'var(--gold)', 'k-rev', 'gold')}
+    ${kpi('cart', 'Pesanan hari ini', k.today_orders, `${k.pending_orders} menunggu proses`, 'var(--green)', 'k-ord')}
+    ${kpi('users', 'Pembeli hari ini', k.today_buyers, `total ${S.num(k.total_buyers)} pembeli`, 'var(--blue)')}
+    ${kpi('receipt', 'Rata-rata order', rp(k.today_aov), 'nilai per checkout', 'var(--purple)')}
+    ${kpi('printer', 'Resi dicetak', resi.printed.length ? S.num(resi.printed.length) + (resi.printed.length >= 6 ? '+' : '') : 0, `${resi.waiting} menunggu dicetak • ${k.active_resi} aktif`, 'var(--blue)')}
+    ${kpi('trend', '7 hari', rp(k.week_revenue), `30 hari ${rp(k.month_revenue)}`, 'var(--accent2)', '', 'gold')}
+    ${kpi('megaphone', 'Iklan', `${k.ads_running} jalan`, `${k.ads_proposed} menunggu Terima`, 'var(--accent2)')}
+    ${kpi('alert', 'Tanda mendesak', urgent.filter((a) => a.flag === '!').length, `${urgent.filter((a) => a.flag === '$').length} promo habis`, 'var(--red)')}
+  </div>
+  <div class="grid two">
+    <div class="card"><h3>${I('chart', 16)} Pendapatan <span class="r"><span class="seg">${[7, 14, 30].map((d) => `<button data-days="${d}" class="${days === d ? 'on' : ''}">${d} hari</button>`).join('')}</span></span></h3>${chart(s.revenue)}</div>
+    <div class="card"><h3><span class="dotlive"></span> Live: checkout, resi & notifikasi <span class="r"><a class="btn xs ghost" href="#pesanan">Semua</a></span></h3><div class="feed" id="live">${empty('Memuat…')}</div></div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+    <div class="card"><h3>${I('cart', 16)} Checkout terbaru <span class="r"><a class="btn xs ghost" href="#pesanan">Kelola</a></span></h3><div class="tw">${ordersTable(s.orders, true)}</div></div>
+    <div class="card"><h3>${I('clock', 16)} Menunggu keputusan Bos</h3>${proposed.length ? proposed.map(adCard).join('<div style="height:10px"></div>') : empty(`Tidak ada proposal iklan.<br><button class="btn sm" data-act="ad-top" style="margin-top:10px">Minta Mira iklankan produk terlaris</button>`)}
+      ${urgent.length ? `<h3 style="margin-top:16px">${I('alert', 16)} Tanda di meja agen</h3>${urgent.map((a) => `<div class="fi"><div class="e">${flagIcon(a)}</div><div><b>${esc(a.name)}</b><span>${esc(a.flag_note)}</span></div></div>`).join('')}` : ''}</div>
+  </div>
+  <div class="grid half" style="margin-top:14px">
+    <div class="card"><h3>${I('users', 16)} Status tim <span class="r"><a class="btn xs ghost" href="#agen">Detail</a></span></h3><div class="mini">${Object.values(AG).map((a) => `<div title="${esc(a.step_label || a.current_task)}">${S.avatar(a, 28)}<span>${esc(a.name)} ${flagIcon(a)}<em>${a.busy ? esc(a.current_task) : esc(a.step_label || 'idle')}</em></span></div>`).join('')}</div></div>
+    <div class="card"><h3>${I('trend', 16)} Produk terlaris (${days} hari)</h3>${s.top.length ? `<table><thead><tr><th>Produk</th><th>Terjual</th><th>Omzet</th><th></th></tr></thead><tbody>${s.top.map((p) => `<tr><td><b>${esc(p.name)}</b></td><td>${p.qty}</td><td class="mono">${rp(p.revenue)}</td><td><button class="btn xs ghost" data-act="ad-auto" data-name="${esc(p.name)}">Iklankan</button></td></tr>`).join('')}</tbody></table>` : empty('Belum ada penjualan')}</div>
+  </div>`;
+};
+P.ringkasan.after = async () => { const n = await S.api('/api/notifications?limit=25'); const el = $('#live'); if (el) el.innerHTML = n.items.map(feedRow).join('') || empty('Belum ada aktivitas'); };
+
+// ---------- Pesanan & Resi ----------
+function ordersTable(orders, compact) {
+  if (!orders.length) return empty('Belum ada pesanan. Pesanan Lazada masuk otomatis saat ada checkout.');
+  return `<table><thead><tr><th>Order</th><th>Pembeli</th>${compact ? '' : '<th>Produk</th>'}<th>Total</th><th>Status</th><th>Resi</th>${compact ? '' : '<th>Cetak</th><th>Aksi</th>'}</tr></thead><tbody>${orders.map((o) => `
+    <tr data-oid="${esc(o.order_id)}"><td><b class="mono" style="font-size:12px">#${esc(o.order_id)}</b><br><small class="muted">${S.timeAgo(o.created_at)}</small> ${o.source === 'demo' ? tag('demo', 'demo') : ''}</td>
+    <td><b>${esc(o.buyer)}</b></td>${compact ? '' : `<td style="max-width:230px">${o.items.map((i) => esc(i.name)).join(', ') || '<span class="muted">—</span>'}</td>`}
+    <td class="mono"><b>${rp(o.total)}</b></td><td>${tag(o.status)}</td>
+    <td>${o.tracking_code ? `<span class="resi" data-act="copy" data-v="${esc(o.tracking_code)}" title="Klik untuk salin">${esc(o.shipment_provider || '')} ${esc(o.tracking_code)}</span>` : '<span class="muted">—</span>'}</td>
+    ${compact ? '' : `<td>${o.printed_at ? `<span class="tag done">${esc(agentName(o.printed_by))}</span>` : o.tracking_code ? '<span class="tag pending">antre</span>' : '<span class="muted">—</span>'}</td>
+    <td style="white-space:nowrap">${['pending', 'unpaid'].includes(o.status) ? `<button class="btn xs" data-act="pack" data-id="${esc(o.order_id)}">Pack</button> ` : ''}${o.status === 'packed' ? `<button class="btn xs green" data-act="rts" data-id="${esc(o.order_id)}">Siap kirim</button> ` : ''}<a class="btn xs ghost" href="/api/orders/${encodeURIComponent(o.order_id)}/label" target="_blank">${I('printer', 13)} Label</a></td>`}</tr>`).join('')}</tbody></table>`;
+}
+P.pesanan = async () => {
+  const [orders, resi] = await Promise.all([S.api('/api/orders?limit=150' + (orderFilter ? '&status=' + orderFilter : '')), S.api('/api/resi?limit=30')]);
+  const st = ['', 'pending', 'packed', 'ready_to_ship', 'shipped', 'delivered', 'canceled'];
+  return `<div class="ph"><div><h2>Pesanan & Resi</h2><p>Checkout masuk otomatis lengkap dengan status & resi. Agen mencetak resi di mejanya — resi tercetak langsung muncul di sini.</p></div>
+    <div class="act"><button class="btn sm" data-act="sync">${I('refresh', 15)} Sinkron sekarang</button></div></div>
+    <div class="grid two"><div class="card"><h3>${I('cart', 16)} ${orders.length} pesanan <span class="r"><span class="seg">${st.map((s) => `<button data-of="${s}" class="${orderFilter === s ? 'on' : ''}">${s ? STATUS_ID[s] : 'Semua'}</button>`).join('')}</span></span></h3><div class="tw">${ordersTable(orders)}</div></div>
+    <div class="card"><h3>${I('printer', 16)} Resi tercetak <span class="r"><span class="tag pending">${resi.waiting} antre</span></span></h3><div class="feed" id="resiList" style="max-height:640px">${resi.printed.map(resiRow).join('') || empty('Belum ada resi dicetak')}</div></div></div>`;
+};
+const resiRow = (o) => `<div class="fi" style="--c:var(--blue)"><div class="e">${I('printer', 15)}</div><div style="flex:1;min-width:0"><b class="mono">${esc(o.shipment_provider || 'Kurir')} ${esc(o.tracking_code)}</b><span>#${esc(o.order_id)} • ${esc(o.buyer)} • ${rp(o.total)}\nDicetak ${esc(agentName(o.printed_by))} • ${S.timeAgo(o.printed_at)}</span></div><a class="btn xs ghost" href="/api/orders/${encodeURIComponent(o.order_id)}/label" target="_blank">Label</a></div>`;
+
+// ---------- Produk ----------
+P.produk = async () => {
+  const prods = await S.api('/api/products'); const low = (S.health && S.health.settings) ? S.health.settings.low_stock : 5;
+  return `<div class="ph"><div><h2>Produk & Stok</h2><p>Ubah harga/stok langsung ke Lazada (Bayu), atau minta Mira membuat iklan dengan satu klik.</p></div>
+    <div class="act"><button class="btn sm ghost" data-act="prod-sync">${I('refresh', 15)} Sinkron produk</button><button class="btn sm" data-act="ad-top">${I('megaphone', 15)} Iklankan produk terlaris</button></div></div>
+    <div class="card"><div class="tw">${prods.length ? `<table><thead><tr><th>Produk</th><th>SKU</th><th>Harga</th><th>Stok</th><th></th><th>Iklan</th></tr></thead><tbody>${prods.map((p) => `
+      <tr><td><b>${esc(p.name)}</b>${p.quantity <= 0 ? ' <span class="tag failed">habis</span>' : p.quantity <= low ? ' <span class="tag pending">menipis</span>' : ''}</td><td class="mono" style="font-size:12px">${esc(p.seller_sku)}</td>
+      <td><input style="width:120px" type="number" value="${p.price}" data-sku-price="${esc(p.seller_sku)}"></td>
+      <td><input style="width:90px" type="number" value="${p.quantity}" data-sku-qty="${esc(p.seller_sku)}"></td>
+      <td><button class="btn xs" data-act="sku-save" data-sku="${esc(p.seller_sku)}">Simpan</button></td>
+      <td style="white-space:nowrap"><button class="btn xs" data-act="ad-auto" data-name="${esc(p.name)}" data-sku="${esc(p.seller_sku)}">Mira buatkan</button> <button class="btn xs ghost" data-act="ad-manual" data-name="${esc(p.name)}" data-sku="${esc(p.seller_sku)}" data-price="${p.price}">Manual</button></td></tr>`).join('')}</tbody></table>` : empty('Belum ada produk. Klik "Sinkron produk".')}</div></div>`;
+};
+
+// ---------- Iklan ----------
+function adCard(a) {
+  const ends = a.ends_at ? new Date(a.ends_at + 7 * 3600e3).toISOString().slice(0, 16).replace('T', ' ') : null;
+  return `<div class="card adc" style="border-left-color:${a.status === 'running' ? 'var(--green)' : a.status === 'proposed' ? 'var(--accent2)' : 'var(--line2)'}">
+    <div class="row"><h4 style="flex:1">#${a.id} ${esc(a.product_name)}</h4>${tag(a.status, { proposed: 'menunggu', running: 'berjalan', rejected: 'ditolak', finished: 'selesai', failed: 'gagal' }[a.status])}</div>
+    <small class="muted">${a.type === 'diskon' ? `Diskon menjadi ${rp(a.sale_price)}` : `Sponsored · budget ${rp(a.budget)}`} · ${a.days} hari · oleh ${agentName(a.by_agent)} · ${S.timeAgo(a.ts)}${ends && a.status === 'running' ? ` · berakhir ${ends} (jam kantor)` : ''}</small>
+    <div class="copy">"${esc(a.copy)}"</div>${a.result ? `<small class="muted">${esc(a.result)}</small>` : ''}
+    <div class="row" style="margin-top:8px">${a.status === 'proposed' ? `<button class="btn sm green" data-act="ad-ok" data-id="${a.id}">${I('check', 14)} Terima — langsung jalan</button><button class="btn sm ghost" data-act="ad-no" data-id="${a.id}">Tolak</button>` : a.status === 'running' ? `<button class="btn sm ghost" data-act="ad-fin" data-id="${a.id}">Selesaikan</button>` : ''}</div></div>`;
+}
+P.iklan = async () => {
+  const ads = await S.api('/api/ads'); const g = (s) => ads.filter((a) => s.includes(a.status));
+  return `<div class="ph"><div><h2>Iklan & Promo</h2><p>Mira membuat proposal. Bos cukup tekan <b>Terima</b> — langsung jalan. Saat masa promo habis, agen memberi tanda <span class="flagc d">$</span> dan mengusulkan perpanjangan.</p></div>
+    <div class="act"><button class="btn sm" data-act="ad-top">Mira: iklankan produk terlaris</button><button class="btn sm ghost" data-act="ad-manual">Proposal manual</button></div></div>
+    <div class="grid half"><div><h3 style="margin:0 0 10px">Menunggu keputusan (${g(['proposed']).length})</h3><div class="grid">${g(['proposed']).map(adCard).join('') || `<div class="card">${empty('Tidak ada proposal')}</div>`}</div>
+      <h3 style="margin:18px 0 10px">Berjalan (${g(['running']).length})</h3><div class="grid">${g(['running']).map(adCard).join('') || `<div class="card">${empty('Belum ada iklan berjalan')}</div>`}</div></div>
+    <div><h3 style="margin:0 0 10px">Riwayat</h3><div class="grid">${g(['rejected', 'finished', 'failed']).slice(0, 15).map(adCard).join('') || `<div class="card">${empty('Belum ada riwayat')}</div>`}</div></div></div>`;
+};
+
+// ---------- Pendapatan ----------
+P.pendapatan = async () => {
+  const [s, inc, ly] = await Promise.all([S.api(`/api/stats?days=${days}&orders=1`), S.api('/api/income?limit=120'), S.api('/api/lynk')]);
+  const k = s.kpi, tot = (k.by_source.lazada || 0) + (k.by_source.lynk || 0) + (k.by_source.manual || 0);
+  const pc = (v) => (tot ? v / tot * 100 : 0); const a1 = pc(k.by_source.lazada || 0), a2 = pc(k.by_source.lynk || 0);
+  return `<div class="ph"><div><h2>Pendapatan</h2><p>Lazada tercatat otomatis dari checkout. Lynk.id lewat input, impor CSV, atau webhook.</p></div>
+    <div class="act"><a class="btn sm ghost" href="${esc(ly.url)}" target="_blank" rel="noopener">${I('link', 15)} Buka Lynk.id</a></div></div>
+  <div class="grid kpis">${kpi('coin', 'Total semua', rp(k.total_revenue), `${S.num(k.total_orders)} pesanan`, 'var(--gold)', '', 'gold')}${kpi('cart', 'Lazada', rp(k.by_source.lazada), 'otomatis dari checkout', 'var(--accent2)')}${kpi('link', 'Lynk.id', rp(k.by_source.lynk), `${ly.transaksi} transaksi`, 'var(--purple)')}${kpi('wallet', 'Lainnya', rp(k.by_source.manual), 'input manual', 'var(--gold)')}</div>
+  <div class="grid two"><div class="card"><h3>${I('chart', 16)} Per hari <span class="r"><span class="seg">${[7, 14, 30].map((d) => `<button data-days="${d}" class="${days === d ? 'on' : ''}">${d} hari</button>`).join('')}</span></span></h3>${chart(s.revenue)}</div>
+    <div class="card"><h3>Sumber pendapatan</h3><div class="donut"><div style="width:150px;height:150px;border-radius:50%;background:conic-gradient(#c9446a 0 ${a1}%,#9b7bdb ${a1}% ${a1 + a2}%,#d6b26e ${a1 + a2}% 100%);display:grid;place-items:center;flex:0 0 auto"><div style="width:96px;height:96px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center;font:700 11px var(--mono);color:var(--gold)">${rp(tot)}</div></div>
+      <div class="legend" style="flex-direction:column;gap:8px"><span><i style="background:#c9446a"></i>Lazada ${Math.round(a1)}%</span><span><i style="background:#9b7bdb"></i>Lynk.id ${Math.round(a2)}%</span><span><i style="background:#d6b26e"></i>Lainnya ${Math.round(100 - a1 - a2)}%</span></div></div>
+      <h3 style="margin-top:18px">Pembeli teratas</h3>${s.buyers.length ? s.buyers.slice(0, 6).map((b, i) => `<div class="row" style="padding:5px 0"><b style="width:18px">${i + 1}</b><span style="flex:1">${esc(b.buyer)}</span><small class="muted">${b.orders}x</small><b class="mono">${rp(b.total)}</b></div>`).join('') : empty('Belum ada pembeli')}</div></div>
+  <div class="grid half" style="margin-top:14px">
+    <div class="card"><h3>${I('link', 16)} Catat penghasilan Lynk.id</h3>
+      <form id="fLynk" class="row"><input name="amount" type="number" placeholder="Nominal, mis. 150000" required><input name="note" placeholder="Catatan (produk)"><select name="source" style="width:130px"><option value="lynk">Lynk.id</option><option value="manual">Lainnya</option></select><button class="btn">Catat</button></form>
+      <label class="f">Impor CSV transaksi dari dashboard Lynk.id</label>
+      <div class="drop" id="drop">${I('upload', 18)} Tarik file CSV ke sini atau klik untuk memilih<input type="file" id="csv" accept=".csv,text/csv" hidden></div>
+      <p class="muted" style="font-size:12px;margin:10px 0 0">Webhook otomatis (Zapier/Make): <code>POST ${location.origin}/api/lynk/webhook?secret=LYNK_WEBHOOK_SECRET</code> body <code>{"amount":150000,"note":"Ebook","id":"INV123"}</code>. Transaksi dengan id sama tidak dobel.</p></div>
+    <div class="card"><h3>Riwayat pemasukan</h3><div class="tw" style="max-height:380px">${inc.length ? `<table><thead><tr><th>Waktu</th><th>Sumber</th><th>Catatan</th><th>Nominal</th><th></th></tr></thead><tbody>${inc.map((r) => `<tr><td><small>${new Date(r.ts).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></td><td>${tag(r.source === 'lazada' ? 'done' : r.source === 'lynk' ? 'shipped' : 'pending', r.source)}</td><td>${esc(r.note)}</td><td class="mono"><b>${rp(r.amount)}</b></td><td>${r.source !== 'lazada' ? `<button class="btn xs ghost" data-act="inc-del" data-id="${r.id}">Hapus</button>` : ''}</td></tr>`).join('')}</tbody></table>` : empty('Belum ada pemasukan')}</div></div></div>`;
+};
+P.pendapatan.after = () => {
+  const f = $('#fLynk'); if (!f) return;
+  f.onsubmit = async (e) => { e.preventDefault(); try { await S.api('/api/income', { body: Object.fromEntries(new FormData(f)) }); f.reset(); render(); } catch (err) { fail(err); } };
+  dropZone($('#drop'), $('#csv'), async (file) => { const r = await S.api('/api/lynk/import', { body: await file.text() }); S.toast({ type: 'money', title: `Impor selesai: ${r.added} transaksi`, text: `Total ${rp(r.total)} · ${r.duplicate} duplikat · ${r.skipped} dilewati` }); render(); });
+};
+function dropZone(drop, inp, fn) {
+  const up = async (file) => { if (!file) return; try { await fn(file); } catch (err) { fail(err); } };
+  drop.onclick = () => inp.click(); inp.onchange = () => up(inp.files[0]);
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); up(e.dataTransfer.files[0]); };
+}
+
+// ---------- Laporan harian ----------
+let repDay = null;
+P.laporan = async () => {
+  const daysL = await S.api('/api/reports');
+  const day = repDay || (daysL[0] && daysL[0].day);
+  const d = day ? await S.api('/api/reports/' + day) : { items: [] };
+  const comp = d.items.find((r) => r.agent === 'perusahaan'), ai = d.items.find((r) => r.agent === 'ringkasan_ai');
+  const agents = d.items.filter((r) => !['perusahaan', 'ringkasan_ai'].includes(r.agent));
+  return `<div class="ph"><div><h2>Laporan Harian</h2><p>Saat jam kerja habis (19:00 jam kantor), setiap agen membuat laporan dan laporan perusahaan otomatis masuk ke sini.</p></div>
+    <div class="act"><button class="btn sm ghost" data-act="rep-build">${I('file', 15)} Buat laporan sekarang</button>${day ? `<button class="btn sm" data-act="rep-ai" data-day="${day}">${I('rocket', 15)} Ringkas dengan AI</button>` : ''}</div></div>
+  <div class="rep"><div class="card days"><h3>${I('clock', 16)} Tanggal</h3>${daysL.map((x) => `<div data-day="${x.day}" class="${x.day === day ? 'on' : ''}"><b class="mono">${x.day}</b><small class="muted">${x.n} laporan</small></div>`).join('') || empty('Belum ada laporan. Gunakan timelapse di Office atau tunggu jam 19:00.')}</div>
+  <div>${day ? `
+    ${ai ? `<div class="card" style="margin-bottom:14px;border-color:rgba(201,68,106,.4)"><h3>${I('rocket', 16)} Ringkasan AI</h3><div class="md">${S.md(ai.content)}</div></div>` : ''}
+    ${comp ? `<div class="card" style="margin-bottom:14px"><div class="grid kpis" style="margin-bottom:8px">${kpi('coin', 'Pendapatan jam kerja', rp(comp.stats.revenue), `${comp.stats.orders} pesanan • ${comp.stats.buyers} pembeli`, 'var(--gold)', '', 'gold')}${kpi('printer', 'Resi dicetak', comp.stats.printed, 'oleh semua agen', 'var(--blue)')}${kpi('tag', 'Promo habis', comp.stats.promo, 'ditandai $', 'var(--gold)')}${kpi('alert', 'Tanda mendesak', comp.stats.urgent, 'ditandai !', 'var(--red)')}</div><div class="md">${S.md(comp.content)}</div></div>` : ''}
+    <div class="repgrid">${agents.map((r) => { const a = AG[r.agent] || { name: r.agent }; return `<div class="card"><h3>${S.avatar(a, 30)} ${esc(a.name)} <span class="r"><small class="muted">${esc(a.role || '')}</small></span></h3>
+      <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="tag">PC ${r.stats.monitor || 0}x</span><span class="tag">Cek toko ${r.stats.cek_toko || 0}x</span><span class="tag packed">Resi ${r.stats.printed || 0}</span><span class="tag pending">$ ${r.stats.promo || 0}</span><span class="tag failed">! ${r.stats.urgent || 0}</span><span class="tag done">Tugas ${r.stats.done || 0}</span></div>
+      <details><summary>Baca laporan</summary><div class="res md">${S.md(r.content)}</div></details></div>`; }).join('')}</div>` : ''}</div></div>`;
+};
+P.laporan.after = () => { document.querySelectorAll('.days [data-day]').forEach((el) => (el.onclick = () => { repDay = el.dataset.day; render(); })); };
+
+// ---------- Pusat perintah ----------
+const QUICK = [['all', 'Laporkan singkat kondisi pekerjaanmu hari ini'], ['toko', 'Cek kondisi toko hari ini dan beri 1 saran'], ['mira', 'Buat proposal iklan untuk produk terlaris'], ['bayu', 'Cek produk yang stoknya menipis'], ['tomi', 'Laporan penjualan 7 hari terakhir'], ['dimas', 'Cek pesanan yang belum diproses'], ['sari', 'Cek chat pembeli dan ringkas'], ['nola', 'Cek kesehatan database SWEET'], ['robot', 'Cek status sistem']];
+P.perintah = async () => {
+  const cmds = await S.api('/api/commands');
+  const opts = `<option value="all">Semua agen (15)</option><option value="dev">Tim Produk & Engineering</option><option value="toko">Tim Toko Lazada</option>` + Object.values(AG).map((a) => `<option value="${a.key}">${esc(a.name)} — ${esc(a.role)}</option>`).join('');
+  const tName = (t) => (t === 'all' ? 'Semua agen' : t === 'dev' || t === 'toko' ? 'Tim ' + t : agentName(t));
+  return `<div class="ph"><div><h2>Pusat Perintah</h2><p>Satu perintah dari Bos langsung dikerjakan agen. Hasil muncul sebagai notifikasi & tersimpan di riwayat.</p></div></div>
+  <div class="grid two"><div class="card"><h3>${I('target', 16)} Perintah baru</h3>
+    <form id="fCmd"><label class="f">Untuk</label><select name="target">${opts}</select>
+    <label class="f">Perintah</label><textarea name="text" rows="3" placeholder="mis. Buat proposal iklan diskon untuk Kopi Arabika 250g" required></textarea>
+    <div class="row" style="margin-top:10px"><button class="btn">${I('play', 13)} Jalankan</button><span class="muted" style="font-size:12px">Berjalan di latar belakang — kamu bisa pindah halaman.</span></div></form>
+    <div class="qchips">${QUICK.map(([t, q]) => `<button data-qt="${t}" data-q="${esc(q)}"><b>${esc(tName(t))}:</b> ${esc(q)}</button>`).join('')}</div>
+    <h3 style="margin-top:20px">${I('chat', 16)} Tanya langsung (tunggu jawaban)</h3>
+    <form id="fAsk" class="row"><select name="key" style="width:200px">${Object.values(AG).map((a) => `<option value="${a.key}">${esc(a.name)}</option>`).join('')}</select><input name="text" placeholder="Pertanyaan…" required><button class="btn">Tanya</button></form>
+    <div id="askOut"></div></div>
+    <div class="card"><h3>${I('list', 16)} Riwayat perintah</h3><div class="feed" style="max-height:600px">${cmds.map((c) => `<div class="fi" style="--c:${c.status === 'selesai' ? 'var(--green)' : c.status === 'gagal' ? 'var(--red)' : 'var(--gold)'}"><div class="e">${I(c.status === 'selesai' ? 'check' : c.status === 'gagal' ? 'x' : 'clock', 15)}</div><div style="min-width:0;flex:1"><b>${esc(c.text)}</b><span>${esc(tName(c.target))} · ${S.timeAgo(c.ts)} · ${c.status}</span>${c.result ? `<details><summary>Lihat hasil</summary><div class="res md">${S.md(c.result)}</div></details>` : ''}</div></div>`).join('') || empty('Belum ada perintah')}</div></div></div>`;
+};
+P.perintah.after = () => {
+  const f = $('#fCmd'); if (!f) return;
+  f.onsubmit = async (e) => { e.preventDefault(); const btn = f.querySelector('button'); await busy(btn, async () => { const r = await S.api('/api/command', { body: Object.fromEntries(new FormData(f)) }); S.toast({ type: 'agent', title: `Perintah #${r.id} dijalankan`, text: `${r.agents.join(', ')} mulai bekerja` }); f.reset(); render(); }); };
+  document.querySelectorAll('[data-qt]').forEach((b) => (b.onclick = () => { f.target.value = b.dataset.qt; f.text.value = b.dataset.q; f.text.focus(); }));
+  const a = $('#fAsk');
+  a.onsubmit = async (e) => { e.preventDefault(); const btn = a.querySelector('button'); await busy(btn, async () => { const r = await S.api('/api/agent/task', { body: Object.fromEntries(new FormData(a)) }); $('#askOut').innerHTML = `<div class="box warm md" style="margin-top:12px"><b>${esc(r.agent)}:</b>${S.md(r.answer)}</div>`; }); };
+};
+
+// ---------- Tim agen ----------
+P.agen = async () => {
+  const list = await S.api('/api/agents'); list.forEach((a) => { AG[a.key] = a; });
+  const card = (a) => `<div class="card ac" style="--c:${a.color}" data-agent="${a.key}"><div class="top">${S.avatar(a)}<div style="flex:1;min-width:0"><b>${esc(a.name)} ${flagIcon(a)}</b><small>${a.no ? `#${a.no} · ` : ''}${esc(a.role)}</small></div>${a.busy || a.step ? '<span class="tag running"><span class="dotlive"></span> kerja</span>' : '<span class="tag">idle</span>'}</div>
+    <div class="st">${esc(a.busy ? a.current_task : a.step_label || a.thought)}${a.flag ? `<div style="color:${a.flag === '!' ? 'var(--red)' : 'var(--gold)'};font-size:11.5px;margin-top:3px">${esc(a.flag_note)}</div>` : ''}</div><div class="ft">${a.tasks_today} tugas hari ini · ${a.tasks_done} selesai ${a.type === 'recruit' ? `<button class="btn xs ghost" style="margin-left:auto" data-act="fire" data-key="${a.key}">Keluarkan</button>` : ''}</div></div>`;
+  const by = (d) => list.filter((a) => a.dept === d).map(card).join('');
+  return `<div class="ph"><div><h2>Tim Agen</h2><p>1 agen = 1 kerjaan. Alur meja: jam tugas → memantau PC → cek toko → print resi → cek promosi → menunggu keputusan → laporan.</p></div><div class="act"><a class="btn sm ghost" href="/ruangan">${I('door', 15)} Slide Ruang Agen</a></div></div>
+  <h3>Tim Produk & Engineering (agent #1–#10)</h3><div class="agrid">${by('dev')}</div>
+  <h3 style="margin-top:22px">Tim Toko Lazada</h3><div class="agrid">${by('toko')}</div>
+  <h3 style="margin-top:22px">Tim Trading — tambang emas, 24 jam (<a href="/trading" style="color:var(--gold)">Trading Terminal</a>)</h3><div class="agrid">${by('trading')}</div>
+  <h3 style="margin-top:22px">Rekrutan (via Telegram) — ruangan terpisah di area Tim Baru</h3><div class="agrid">${by('rekrut') || `<div class="card">${empty('Belum ada rekrutan')}</div>`}
+    <div class="card" style="padding:14px"><b>Rekrut karyawan</b><form id="fRec" style="margin-top:8px"><input name="username" placeholder="@username Telegram" required><input name="role" placeholder="Peran (mis. Admin Gudang)" style="margin-top:8px"><button class="btn sm" style="margin-top:8px">Rekrut</button></form></div></div>`;
+};
+P.agen.after = () => { const f = $('#fRec'); if (f) f.onsubmit = async (e) => { e.preventDefault(); try { await S.api('/api/recruit', { body: Object.fromEntries(new FormData(f)) }); render(); } catch (err) { fail(err); } }; };
+async function openAgent(key) {
+  const d = await S.api('/api/agent/' + encodeURIComponent(key)); const a = d.agent;
+  const dr = $('#drawer');
+  dr.innerHTML = `<div class="hd" style="background:linear-gradient(135deg,${a.color}33,transparent)">${S.avatar(a, 52)}<div style="flex:1"><b style="font-size:17px">${esc(a.name)}</b><div class="muted" style="font-weight:700;font-size:12.5px">${a.no ? `Agent #${a.no} · ` : ''}${esc(a.role)}</div></div><button class="btn sm ghost" id="dx">${I('x', 14)}</button></div>
+  <div class="bd"><p class="muted">${esc(a.specialty)}</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:8px">${kpi('list', 'Hari ini', d.stats.today, '', 'var(--blue)')}${kpi('check', 'Selesai', d.stats.done, '', 'var(--green)')}${kpi('x', 'Gagal', d.stats.failed, '', 'var(--red)')}</div>
+    <form id="fAg" class="row" style="margin-top:14px"><input name="text" placeholder="Perintah untuk ${esc(a.name)}…" required><button class="btn">Kirim</button></form><div id="agOut"></div>
+    <h3 style="margin-top:18px">Tugas</h3>${d.tasks.map((t) => `<div class="fi" style="--c:${t.status === 'done' ? 'var(--green)' : t.status === 'running' ? 'var(--gold)' : 'var(--red)'}"><div class="e">${I(t.status === 'done' ? 'check' : t.status === 'running' ? 'clock' : 'x', 14)}</div><div style="flex:1;min-width:0"><b>${esc(t.title)}</b><span>${S.timeAgo(t.ts)} · ${t.source || ''}</span>${t.result ? `<details><summary>Hasil</summary><div class="res md">${S.md(t.result)}</div></details>` : ''}</div></div>`).join('') || empty('Belum ada tugas')}
+    ${d.deliverables.length ? `<h3 style="margin-top:18px">Hasil proyek</h3>${d.deliverables.map((x) => `<div class="fi"><div class="e">${I('file', 14)}</div><div style="flex:1;min-width:0"><b>Proyek #${x.project_id}: ${esc(x.kind)}</b> ${tag(x.status)}<details><summary>Lihat</summary><div class="res md">${S.md(x.content)}</div></details></div></div>`).join('')}` : ''}
+    <h3 style="margin-top:18px">Aktivitas</h3>${d.activity.slice(0, 20).map((x) => `<div class="fi"><div class="e" style="font:700 9px var(--mono)">${esc(x.kind).slice(0, 6)}</div><div><b style="font-weight:600">${esc(x.text)}</b><span>${S.timeAgo(x.ts)}</span></div></div>`).join('')}</div>`;
+  dr.classList.add('open');
+  $('#dx').onclick = () => dr.classList.remove('open');
+  const f = $('#fAg'); f.onsubmit = async (e) => { e.preventDefault(); const btn = f.querySelector('button'); await busy(btn, async () => { const r = await S.api('/api/agent/task', { body: { key, text: f.text.value } }); $('#agOut').innerHTML = `<div class="box warm md" style="margin-top:10px">${S.md(r.answer)}</div>`; f.reset(); }); };
+}
+
+// ---------- Proyek ----------
+let openProject = null;
+P.proyek = async () => {
+  const d = await S.api('/api/projects');
+  const p = openProject ? await S.api('/api/projects/' + openProject).catch(() => null) : (d.items[0] ? await S.api('/api/projects/' + d.items[0].id) : null);
+  const stepState = (st) => {
+    if (!p) return '';
+    const dl = p.deliverables.filter((x) => x.kind === st.kind); const last = dl[dl.length - 1];
+    if (p.status === 'running' && p.step && p.step.split('+').includes(st.id)) return 'run';
+    if (!last) return '';
+    return last.status === 'returned' ? 'ret' : 'done';
+  };
+  return `<div class="ph"><div><h2>Proyek 10 Agen</h2><p>Bos memberi ide → tiap agen mengerjakan 1 kerjaan → Mobile & Backend barengan dengan 1 kontrak API → Tech Lead mereview, yang jelek dikembalikan.</p></div></div>
+  <div class="card"><form id="fPrj" class="row"><input name="idea" placeholder="Ide aplikasi, mis. Aplikasi chat jual-beli dengan pembayaran QRIS" required ${d.running ? 'disabled' : ''}><button class="btn" ${d.running ? 'disabled' : ''}>${I('rocket', 14)} Mulai proyek</button></form>
+    ${d.running ? `<p class="muted" style="margin:8px 0 0">Proyek #${d.running} sedang berjalan…</p>` : ''}</div>
+  <div class="grid two" style="margin-top:14px">
+    <div class="card">${p ? `<h3>Proyek #${p.id} ${tag(p.status === 'running' ? 'running' : p.status === 'done' ? 'done' : 'failed', p.status)} <span class="r"><small class="muted">putaran review ${p.round}</small></span></h3>
+      <p style="margin:0 0 6px"><b>${esc(p.idea)}</b></p>
+      <div class="steps">${d.steps.map((st, i) => `<span class="stp ${stepState(st)}">${i + 1}. ${esc(st.kind)} <small class="muted">${agentName(Object.values(AG).find((a) => a.job === st.job)?.key)}</small></span>`).join('')}<span class="stp ${p.step && p.step.startsWith('review') ? 'run' : p.status === 'done' ? 'done' : ''}">10. Review Tech Lead</span></div>
+      ${p.summary ? `<div class="box good" style="margin:8px 0">${esc(p.summary)}</div>` : ''}
+      ${p.deliverables.map((x) => `<details style="border-top:1px solid var(--line);padding:10px 0"><summary style="display:flex;gap:8px;align-items:center;color:var(--ink)"><b style="flex:1">${esc(x.kind)} · ${agentName(x.agent)} <small class="muted">r${x.round}</small></b>${tag(x.status, { approved: 'disetujui', returned: 'dikembalikan', submitted: 'dikirim' }[x.status])}</summary>${x.review ? `<div class="box bad" style="margin:8px 0;font-size:12.5px">Tech Lead: ${esc(x.review)}</div>` : ''}<div class="md" style="font-size:13px;margin-top:8px">${S.md(x.content)}</div></details>`).join('') || empty('Menunggu hasil pertama…')}` : empty('Belum ada proyek. Tulis ide di atas lalu klik Mulai.')}</div>
+    <div class="card"><h3>Semua proyek</h3>${d.items.map((x) => `<div class="fi" style="cursor:pointer;--c:${x.status === 'done' ? 'var(--green)' : x.status === 'running' ? 'var(--gold)' : 'var(--red)'}" data-prj="${x.id}"><div class="e">${I(x.status === 'done' ? 'check' : x.status === 'running' ? 'clock' : 'alert', 14)}</div><div><b>#${x.id} ${esc(x.idea.slice(0, 70))}</b><span>${x.status} · ${esc(x.step || '')} · ${S.timeAgo(x.ts)}</span></div></div>`).join('') || empty('Belum ada')}</div></div>`;
+};
+P.proyek.after = () => {
+  const f = $('#fPrj'); if (f) f.onsubmit = async (e) => { e.preventDefault(); try { const r = await S.api('/api/projects', { body: { idea: f.idea.value } }); openProject = r.id; render(); } catch (err) { fail(err); } };
+  document.querySelectorAll('[data-prj]').forEach((el) => (el.onclick = () => { openProject = el.dataset.prj; render(); }));
+};
+
+// ---------- Rapat ----------
+P.rapat = async () => {
+  const [list, h] = [await S.api('/api/meetings'), await S.api('/api/health')];
+  const cur = h.meeting ? await S.api('/api/meetings/' + h.meeting.id) : null;
+  const sel = list.find((m) => m.status !== 'berlangsung');
+  const detail = sel ? await S.api('/api/meetings/' + sel.id) : null;
+  const note = (n) => `<div class="fi">${S.avatar(AG[n.agent] || { name: n.agent }, 32)}<div><b>${agentName(n.agent)}</b><span>${esc(n.text)}</span></div></div>`;
+  return `<div class="ph"><div><h2>Rapat & Notulen</h2><p>Semua agen berjalan ke Ruang Rapat dan melapor bergiliran. Saat dibubarkan, Tech Lead membuat kesimpulan & action item yang langsung dikerjakan.</p></div>
+    <div class="act"><a class="btn sm ghost" href="/office#meeting">${I('office', 15)} Tonton di Office</a>${h.mode === 'istirahat' ? '<button class="btn sm ghost" data-act="work">Kembali kerja</button>' : h.mode === 'kerja' ? '<button class="btn sm ghost" data-act="break">Istirahat</button>' : ''}</div></div>
+  <div class="grid two"><div class="card">${cur ? `<h3><span class="dotlive"></span> Rapat #${cur.id} berlangsung: ${esc(cur.topic)} <span class="r"><button class="btn sm red" data-act="dismiss">Bubarkan rapat</button></span></h3>${cur.notes.map(note).join('') || empty('Agen sedang berjalan ke ruang rapat…')}`
+    : `<h3>${I('mic', 16)} Mulai rapat</h3><form id="fMeet" class="row"><input name="topic" placeholder="Topik, mis. Evaluasi penjualan minggu ini" value="Koordinasi Rutin"><button class="btn">Mulai rapat</button></form>
+      ${detail ? `<h3 style="margin-top:18px">Notulen terakhir: #${detail.id} ${esc(detail.topic)} <span class="r"><small class="muted">${new Date(detail.ts).toLocaleString('id-ID')}</small></span></h3>
+      ${detail.summary ? `<div class="box good" style="margin-bottom:8px">${esc(detail.summary)}</div>` : ''}
+      ${detail.action_items.length ? `<b>Action item</b>${detail.action_items.map((x) => `<div class="fi">${S.avatar(AG[x.agent] || { name: x.agent }, 32)}<div><b>${agentName(x.agent)}</b><span>${esc(x.task)}</span></div></div>`).join('')}` : ''}
+      <details style="margin-top:8px"><summary>Laporan tiap agen (${detail.notes.length})</summary>${detail.notes.map(note).join('')}</details>` : ''}`}</div>
+    <div class="card"><h3>Riwayat rapat</h3>${list.map((m) => `<div class="fi" style="--c:${m.status === 'berlangsung' ? 'var(--red)' : 'var(--teal)'}"><div class="e">${I(m.status === 'berlangsung' ? 'mic' : 'file', 14)}</div><div><b>#${m.id} ${esc(m.topic)}</b><span>${new Date(m.ts).toLocaleString('id-ID')} · ${m.status}${m.action_items.length ? ` · ${m.action_items.length} action item` : ''}</span></div></div>`).join('') || empty('Belum ada rapat')}</div></div>`;
+};
+P.rapat.after = () => { const f = $('#fMeet'); if (f) f.onsubmit = async (e) => { e.preventDefault(); try { await S.api('/api/meeting', { body: { topic: f.topic.value } }); S.toast({ type: 'project', title: 'Rapat dimulai', text: 'Agen menuju Ruang Rapat' }); setTimeout(render, 600); } catch (err) { fail(err); } }; };
+
+// ---------- Chat pembeli ----------
+let chatSel = null;
+P.chat = async () => {
+  const r = await S.api('/api/lazada/chats').catch((e) => ({ error: e.message }));
+  const list = r.data?.session_list || r.data?.sessions || (Array.isArray(r.data) ? r.data : []);
+  let msgs = [];
+  if (chatSel) { const m = await S.api('/api/lazada/chats/' + encodeURIComponent(chatSel)).catch(() => ({})); msgs = m.data?.message_list || m.data?.messages || (Array.isArray(m.data) ? m.data : []); }
+  return `<div class="ph"><div><h2>Chat Pembeli</h2><p>Sari (Customer Service) membantu membalas. ${r.simulasi ? '<b>Mode simulasi</b> — hubungkan Lazada untuk chat asli.' : ''}</p></div></div>
+  <div class="card chat"><div class="sess">${list.map((s) => `<div data-sess="${esc(s.session_id)}" class="${chatSel === String(s.session_id) ? 'on' : ''}"><b>${esc(s.buyer || s.title || s.buyer_name || 'Pembeli')}</b><br><small class="muted">${esc(s.last_message || s.summary || '')}</small>${s.unread || s.unread_count ? ` <span class="tag pending">${s.unread || s.unread_count}</span>` : ''}</div>`).join('') || empty(r.error ? esc(r.error) : 'Tidak ada chat')}</div>
+    <div>${chatSel ? `<div class="msgs">${msgs.map((m) => `<div class="msg ${m.from === 'seller' || m.from_account_type === 2 ? 'me' : ''}">${esc(m.text || m.content || JSON.stringify(m).slice(0, 200))}</div>`).join('') || empty('Belum ada pesan')}</div>
+      <form id="fChat" class="row" style="margin-top:10px"><input name="text" placeholder="Tulis balasan…" required><button class="btn">Kirim</button><button type="button" class="btn ghost" data-act="chat-ai">Draft oleh Sari</button></form><div id="chatAi"></div>` : empty('Pilih percakapan di kiri')}</div></div>`;
+};
+P.chat.after = () => {
+  document.querySelectorAll('[data-sess]').forEach((el) => (el.onclick = () => { chatSel = el.dataset.sess; render(); }));
+  const f = $('#fChat'); if (f) f.onsubmit = async (e) => { e.preventDefault(); try { await S.api(`/api/lazada/chats/${encodeURIComponent(chatSel)}/reply`, { body: { text: f.text.value } }); S.toast({ type: 'success', title: 'Balasan terkirim' }); render(); } catch (err) { fail(err); } };
+};
+
+// ---------- Aktivitas ----------
+let actAgent = '';
+P.aktivitas = async () => {
+  const rows = await S.api('/api/activity?limit=200' + (actAgent ? '&agent=' + actAgent : ''));
+  return `<div class="ph"><div><h2>Log Aktivitas</h2><p>Semua yang dikerjakan agen, tercatat di database secara realtime.</p></div>
+    <div class="act"><select id="actSel" style="width:220px"><option value="">Semua agen</option>${Object.values(AG).map((a) => `<option value="${a.key}" ${actAgent === a.key ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}<option value="sistem" ${actAgent === 'sistem' ? 'selected' : ''}>Sistem</option><option value="kevin" ${actAgent === 'kevin' ? 'selected' : ''}>Kevin</option></select></div></div>
+  <div class="card"><div id="actList">${rows.map(actRow).join('') || empty('Belum ada aktivitas')}</div></div>`;
+};
+const actRow = (x) => `<div class="fi">${S.avatar(AG[x.agent] || { name: agentName(x.agent), color: '#3a2a31' }, 32)}<div style="flex:1"><b>${agentName(x.agent)} <span class="tag" style="margin-left:6px">${esc(x.kind)}</span></b><span>${esc(x.text)}</span></div><small class="muted mono" style="white-space:nowrap">${S.clock(x.ts)}</small></div>`;
+P.aktivitas.after = () => { const s = $('#actSel'); if (s) s.onchange = () => { actAgent = s.value; render(); }; };
+
+// ---------- Sistem ----------
+P.sistem = async () => {
+  const h = await S.api('/api/health'); const st = h.settings; const ck = h.cookies || {}; const lz = await S.api('/api/lazada/status').catch(() => ({}));
+  const sw = (k, label, sub) => `<div class="setrow"><div style="flex:1"><b>${label}</b><small>${sub}</small></div><button class="switch ${st[k] ? 'on' : ''}" data-set="${k}"></button></div>`;
+  const line = (ok, label, val) => `<div class="setrow"><span class="chip ${ok ? 'ok' : 'warn'}"><i></i>${ok ? 'Aktif' : 'Belum'}</span><div style="flex:1"><b>${label}</b><small>${val}</small></div></div>`;
+  const sess = ck.session;
+  return `<div class="ph"><div><h2>Sistem & Integrasi</h2><p>Koneksi, AI, jam kantor, dan pengaturan kerja otomatis.</p></div></div>
+  <div class="grid half"><div class="card"><h3>${I('link', 16)} Integrasi</h3>
+    ${line(h.ai.claude, 'Claude (Anthropic)', h.ai.claude ? `model: ${esc(h.ai.claude)}` : 'isi CLAUDE_API_KEY di .env')}
+    ${line(h.ai.gemini, 'Gemini (cadangan)', h.ai.gemini || 'opsional: GEMINI_API_KEY')}
+    ${line(h.hermes_live, 'Hermes Agent (cadangan)', h.hermes_live ? `berjalan di ${esc(h.ai.hermes)}` : h.ai.hermes ? 'belum berjalan — lihat kartu Hermes di bawah' : 'opsional: HERMES_API_KEY')}
+    <div class="setrow"><div style="flex:1"><b>Urutan AI</b><small>${h.ai.order.join(' → ') || 'mode simulasi'}</small></div></div>
+    ${line(h.telegram, 'Bot Telegram', h.telegram ? 'berjalan — ketik /bantuan di bot' : 'isi TELEGRAM_BOT_TOKEN')}
+    ${line(h.lazada === 'live', 'Lazada Open Platform', h.lazada === 'live' ? 'LIVE (data asli)' : h.lazada === 'perlu-otorisasi' ? 'App key ada — klik Otorisasi' : 'Simulasi — isi LAZADA_APP_KEY & SECRET')}
+    <div class="setrow" style="display:block;font-size:12.5px;color:var(--ink2)">App Key: <b class="mono">${esc(lz.app_key || '-')}</b> · Callback URL (samakan di Lazada Open Platform): <code class="mono" style="user-select:all">${esc(lz.redirect || '')}</code>${lz.token ? `<br>Toko: <b>${esc(lz.token.account || '-')}</b> ${esc((lz.token.country || '').toUpperCase())} · token sampai ${new Date(lz.token.expires_at).toLocaleString('id-ID')} (diperpanjang otomatis)` : ''}</div>
+    <div class="row" style="padding:10px 0;gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="lz-auth">${I('link', 14)} ${lz.live ? 'Otorisasi ulang' : 'Otorisasi toko Lazada'}</button>${lz.live ? `<button class="btn sm ghost" data-act="sync">${I('clock', 14)} Sinkron sekarang</button><button class="btn sm ghost" data-act="lz-off">Putuskan</button>` : ''}</div>
+    ${line(true, 'Database', `${esc(h.db)} · data/sweet.db`)}
+    <div class="setrow"><div style="flex:1"><b>Uptime server</b><small>${Math.round(h.uptime / 60)} menit</small></div></div></div>
+  <div class="card"><h3>${I('cookie', 16)} Seller Center (cookies) <span class="r"><span class="tag">tersimpan di database</span></span></h3>
+    <div class="box ${sess ? (sess.ok ? 'good' : 'bad') : ''}" style="margin-bottom:12px"><b>${sess ? (sess.ok ? 'Terhubung — sesi Seller Center aktif' : 'Sesi belum aktif') : ck.found ? 'Cookies tersimpan, belum dicek' : 'Belum ada cookies'}</b>
+      <div class="muted" style="font-size:12px;margin-top:3px">${ck.cookies || 0} cookie Lazada${ck.expired ? ` • <span style="color:var(--red)">${ck.expired} kedaluwarsa</span>` : ''}${ck.uploaded_at ? ` • diunggah ${S.timeAgo(ck.uploaded_at)} oleh ${esc(ck.uploaded_by || '-')}` : ''}${ck.ua ? ' • User-Agent browser tersimpan' : ''}</div>
+      ${sess ? `<div style="font-size:12.5px;margin-top:6px">${esc(sess.reason)} <span class="muted">• dicek ${S.timeAgo(sess.at)}</span></div>` : ''}</div>
+    ${(ck.session_cookies || []).length ? `<div class="tw" style="margin-bottom:10px"><table><thead><tr><th>Cookie sesi</th><th>Berlaku sampai</th></tr></thead><tbody>${ck.session_cookies.map((c) => `<tr><td class="mono" style="font-size:12px">${esc(c.name)}</td><td>${c.expires ? `<span class="${c.expired ? 'down' : ''}">${new Date(c.expires).toLocaleString('id-ID')}${c.expired ? ' (habis)' : ''}</span>` : 'sesi browser'}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    <div class="drop" id="cdrop">${I('upload', 18)} Upload cookies.txt / .json Seller Center (tarik ke sini / klik)<input type="file" id="cfile" accept=".txt,.json,text/plain,application/json" hidden></div>
+    <details style="margin-top:10px"><summary>Atau tempel isi cookies</summary><textarea id="cpaste" rows="4" placeholder="Tempel isi cookies.txt, JSON Cookie-Editor, atau header Cookie: a=b; c=d" style="margin-top:8px"></textarea><button class="btn sm" data-act="ck-paste" style="margin-top:8px">Simpan ke database</button></details>
+    <p class="muted" style="font-size:12px;margin:10px 0 0">Cara: login di <code>sellercenter.lazada.co.id</code> → ekspor cookies dengan ekstensi (mis. "Get cookies.txt LOCALLY" atau "Cookie-Editor") → upload dari <b>browser yang sama</b>, karena User-Agent browser ikut disimpan agar sesi dikenali Lazada. Cookies disimpan permanen di database (tetap ada setelah restart) dan isinya tidak pernah ditampilkan. Jika sesi kedaluwarsa, login ulang lalu upload lagi.</p>
+    <div class="row" style="margin-top:10px"><button class="btn sm ghost" data-act="lz-sess">${I('refresh', 14)} Cek sesi sekarang</button>${ck.found ? `<button class="btn sm ghost" data-act="ck-del">Hapus cookies</button>` : ''}</div>
+    <h3 style="margin-top:20px">${I('clock', 16)} Jam kantor & timelapse</h3>
+    <div class="setrow"><div style="flex:1"><b>${h.clock.time} • ${esc(h.clock.label)}</b><small>${h.clock.speed === 1 ? 'Waktu nyata (WIB)' : `Timelapse ${h.clock.speed}x`}</small></div><span class="seg">${h.clock.speeds.map((v) => `<button data-speed="${v}" class="${h.clock.speed === v ? 'on' : ''}">${v === 1 ? 'Real' : v + 'x'}</button>`).join('')}</span></div>
+    ${sw('auto_schedule', 'Jadwal otomatis', '05:00 kerja • 12:00 istirahat • 19:00 laporan • 19:30 pulang ke Stay Home • 20:00–04:00 kantor tutup')}
+  </div></div>
+  <div class="grid half" style="margin-top:14px"><div class="card"><h3>${I('gear', 16)} Kerja otomatis</h3>
+    ${sw('autowork', 'Alur kerja meja otomatis', 'Memantau PC → cek toko → print resi → cek promo → menunggu keputusan')}
+    ${sw('auto_print', 'Print resi otomatis', 'Resi baru dicetak agen dan langsung masuk dashboard')}
+    ${sw('auto_pack', 'Auto-pack pesanan (Dimas)', 'Pesanan pending langsung dikemas agar resi terbit')}
+    ${sw('auto_reply', 'Auto-balas chat (Sari)', 'Chat pembeli dibalas otomatis oleh AI')}
+    ${sw('demo_orders', 'Pesanan DEMO', 'Hanya saat mode simulasi — agar dashboard terlihat hidup')}
+    <div class="setrow"><div style="flex:1"><b>Batas stok menipis</b><small>Peringatan jika stok ≤ angka ini</small></div><input type="number" value="${st.low_stock}" style="width:90px" id="lowStock"><button class="btn xs" data-act="low-save">Simpan</button></div></div>
+  <div class="card" id="hermesCard"><h3>${I('rocket', 16)} Hermes Agent <span class="r"><button class="btn xs ghost" data-act="h-check">Cek</button></span></h3><div id="hermesBody">${empty('Memeriksa Hermes…')}</div></div>
+  <div class="card"><h3>${I('bell', 16)} Notifikasi</h3>
+    ${sw('telegram_notify', 'Teruskan notifikasi ke Telegram', 'Mati = notifikasi hanya tampil di website. Perintah bot Telegram tetap berfungsi.')}
+    <div class="setrow"><div style="flex:1"><b>Suara notifikasi</b><small>Bunyi saat ada checkout / notifikasi</small></div><button class="switch ${S.store.get('sound', true) ? 'on' : ''}" data-act="sound"></button></div>
+    <div class="setrow"><div style="flex:1"><b>Uji notifikasi</b><small>Lihat animasi notifikasi jatuh & hilang</small></div><button class="btn xs ghost" data-act="test-toast">Coba</button></div></div></div>`;
+};
+async function hermesCard() {
+  const el = $('#hermesBody'); if (!el) return;
+  try {
+    const h = await S.api('/api/hermes');
+    el.innerHTML = `<div class="box ${h.api ? 'good' : h.state === 'menyalakan' ? 'warm' : 'bad'}"><b>${h.api ? 'Aktif — siap jadi AI cadangan' : h.state === 'menyalakan' ? 'Sedang dinyalakan…' : 'Belum aktif'}</b><div class="muted" style="font-size:12px;margin-top:3px">${esc(h.url)}${h.managed ? ' • dijalankan otomatis oleh SWEET' : ''}${h.auth_error ? ' • kunci API ditolak (HERMES_API_KEY tidak cocok)' : ''}</div>${h.error ? `<div style="font-size:12.5px;margin-top:6px;color:#f3a6ae">${esc(h.error)}</div>` : ''}</div>
+      <div class="row" style="margin-top:10px">${h.api ? (h.managed ? '<button class="btn sm ghost" data-act="h-stop">Matikan</button>' : '') : '<button class="btn sm" data-act="h-start">Nyalakan Hermes</button>'}</div>
+      ${h.log && h.log.length ? `<details style="margin-top:10px"><summary>Log Hermes</summary><pre class="res mono" style="white-space:pre-wrap;font-size:11px">${esc(h.log.join('\n'))}</pre></details>` : ''}
+      <p class="muted" style="font-size:12px;margin:10px 0 0">SWEET menyalakan <code>hermes gateway</code> otomatis saat server start, dengan kunci dari <code>HERMES_API_KEY</code>. Jika Hermes belum terpasang, jalankan <code>scripts\\hermes-install.bat</code> sekali (memakai WSL2), lalu pilih model dengan <code>hermes setup</code>.</p>`;
+  } catch (e) { el.innerHTML = empty(esc(e.message)); }
+}
+P.sistem.after = () => {
+  hermesCard();
+  const d = $('#cdrop'); if (!d) return;
+  dropZone(d, $('#cfile'), async (file) => uploadCookies(await file.text()));
+};
+
+// ---------- Pengguna (admin) ----------
+P.pengguna = async () => {
+  if (!S.user || S.user.role !== 'admin') return `<div class="card">${empty('Halaman ini khusus admin.')}</div>`;
+  const d = await S.api('/api/users');
+  return `<div class="ph"><div><h2>Pengguna</h2><p>Akun terdaftar dengan Gmail terverifikasi OTP. Admin memiliki kontrol penuh; pengguna biasa hanya bisa melihat.</p></div></div>
+  <div class="grid"><div class="card"><h3>${I('users', 16)} ${d.items.length} akun</h3><div class="tw"><table><thead><tr><th>Pengguna</th><th>Peran</th><th>Status</th><th>Terakhir masuk</th><th></th></tr></thead><tbody>${d.items.map((u) => `
+    <tr><td><div class="row">${S.avatar({ name: u.name, color: u.role === 'admin' ? '#a52a4a' : '#3a2a31' }, 32)}<div><b>${esc(u.name)}</b>${u.id === S.user.id ? ' <span class="tag">kamu</span>' : ''}<br><small class="muted">${esc(u.email)}</small></div></div></td>
+    <td>${u.role === 'admin' ? '<span class="tag demo">Admin</span>' : '<span class="tag">Pengguna</span>'}</td>
+    <td>${u.disabled ? '<span class="tag failed">Nonaktif</span>' : u.verified ? '<span class="tag done">Terverifikasi</span>' : '<span class="tag pending">Belum verifikasi</span>'}</td>
+    <td><small>${u.last_login ? S.timeAgo(u.last_login) : '—'}</small></td>
+    <td style="white-space:nowrap">${u.id === S.user.id ? '' : `<button class="btn xs ghost" data-act="u-role" data-id="${u.id}" data-role="${u.role === 'admin' ? 'user' : 'admin'}">${u.role === 'admin' ? 'Jadikan pengguna' : 'Jadikan admin'}</button> <button class="btn xs ghost" data-act="u-dis" data-id="${u.id}" data-dis="${u.disabled ? 0 : 1}">${u.disabled ? 'Aktifkan' : 'Nonaktifkan'}</button> <button class="btn xs red" data-act="u-del" data-id="${u.id}">Hapus</button>`}</td></tr>`).join('')}</tbody></table></div></div>
+  <div class="card"><h3>${I('mail', 16)} Email OTP</h3>
+    <div class="box ${d.mail ? 'good' : 'bad'}"><b>${d.mail ? 'Pengiriman email aktif' : 'Pengiriman email belum dikonfigurasi'}</b><div class="muted" style="font-size:12.5px;margin-top:4px">${d.mail ? 'Kode OTP pendaftaran & lupa sandi dikirim lewat Gmail SMTP.' : 'Isi SMTP_USER (Gmail pengirim) dan SMTP_PASS (App Password 16 huruf) di file .env, lalu restart server. Tanpa ini, akun baru tidak bisa diverifikasi.'}</div></div>
+    <form id="fMail" class="row" style="margin-top:12px"><input name="to" type="email" placeholder="Kirim email tes ke…" value="${esc(S.user.email)}"><button class="btn">Kirim tes</button></form>
+    <p class="muted" style="font-size:12px;margin-top:12px">Cara membuat App Password Gmail: aktifkan Verifikasi 2 Langkah di akun Google → buka myaccount.google.com/apppasswords → buat sandi aplikasi "SWEET" → salin 16 hurufnya ke <code>SMTP_PASS</code>.</p></div></div>`;
+};
+P.pengguna.after = () => { const f = $('#fMail'); if (f) f.onsubmit = async (e) => { e.preventDefault(); const btn = f.querySelector('button'); await busy(btn, async () => { await S.api('/api/mail/test', { body: { to: f.to.value } }); S.toast({ type: 'success', title: 'Email tes terkirim', text: f.to.value }); }); }; };
+
+// ---------- Akun saya ----------
+P.akun = async () => {
+  const u = S.user || (await S.api('/api/auth/me')).user;
+  return `<div class="ph"><div><h2>Akun saya</h2><p>${esc(u.email)} • ${u.role === 'admin' ? 'Admin (kontrol penuh)' : 'Pengguna (lihat saja)'}</p></div><div class="act"><a class="btn sm ghost" href="/logout">${I('logout', 15)} Keluar</a></div></div>
+  <div class="grid half"><div class="card"><h3>${I('lock', 16)} Ganti kata sandi</h3>
+    <form id="fPw"><label class="f">Kata sandi lama</label><input type="password" name="old" required autocomplete="current-password">
+    <label class="f">Kata sandi baru</label><input type="password" name="password" required minlength="8" autocomplete="new-password">
+    <label class="f">Ulangi kata sandi baru</label><input type="password" name="password2" required autocomplete="new-password">
+    <button class="btn" style="margin-top:14px">Simpan</button></form></div>
+  <div class="card"><h3>${I('user', 16)} Profil</h3><div class="row">${S.avatar({ name: u.name, color: u.role === 'admin' ? '#a52a4a' : '#3a2a31' }, 56)}<div><b style="font-size:16px">${esc(u.name)}</b><div class="muted">${esc(u.email)}</div><div class="muted" style="font-size:12px">Terdaftar ${u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '-'}</div></div></div></div></div>`;
+};
+P.akun.after = () => { const f = $('#fPw'); if (f) f.onsubmit = async (e) => { e.preventDefault(); const d = Object.fromEntries(new FormData(f)); if (d.password !== d.password2) return fail(new Error('Kata sandi baru tidak sama')); try { await S.api('/api/auth/password', { body: { old: d.old, password: d.password } }); S.toast({ type: 'success', title: 'Kata sandi diperbarui' }); f.reset(); } catch (err) { fail(err); } }; };
+
+async function uploadCookies(raw) {
+  const r = await S.api('/api/lazada/cookies', { body: { raw, ua: navigator.userAgent } });
+  S.toast({ type: r.session.ok ? 'success' : 'warn', title: r.session.ok ? 'Seller Center terhubung' : 'Cookies tersimpan di database', text: `${r.cookies} cookie Lazada • ${r.session.reason}`, ms: 9000 });
+  render();
+}
+
+// ================= Aksi =================
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-act],[data-days],[data-of],[data-agent],[data-set],[data-speed]'); if (!b) return;
+  if (b.dataset.days) { days = Number(b.dataset.days); return render(); }
+  if (b.dataset.speed) { try { await S.api('/api/clock', { body: { speed: Number(b.dataset.speed) } }); render(); } catch (err) { fail(err); } return; }
+  if (b.dataset.of !== undefined) { orderFilter = b.dataset.of; return render(); }
+  if (b.dataset.agent && !e.target.closest('[data-act]')) return openAgent(b.dataset.agent);
+  if (b.dataset.set) { const k = b.dataset.set; const on = !b.classList.contains('on'); try { await S.api('/api/settings', { body: { [k]: on } }); b.classList.toggle('on', on); } catch (err) { fail(err); } return; }
+  const act = b.dataset.act, id = b.dataset.id;
+  const A = {
+    sync: () => busy(b, async () => { await S.api('/api/lazada/sync', { body: {} }); S.toast({ type: 'success', title: 'Sinkron selesai' }); render(); }),
+    'prod-sync': () => busy(b, async () => { const r = await S.api('/api/products/sync', { body: {} }); S.toast({ type: 'success', title: `Produk tersinkron (${r.count})` }); render(); }),
+    copy: async () => { try { await navigator.clipboard.writeText(b.dataset.v); S.toast({ type: 'resi', title: 'Resi disalin', text: b.dataset.v, ms: 2500 }); } catch (_) {} },
+    pack: () => busy(b, async () => { const r = await S.api(`/api/orders/${encodeURIComponent(id)}/pack`, { body: {} }); S.toast({ type: 'resi', title: `Pesanan #${id} dikemas`, text: r.tracking_code ? `Resi ${r.provider || ''} ${r.tracking_code}` : '' }); render(); }),
+    rts: () => busy(b, async () => { await S.api(`/api/orders/${encodeURIComponent(id)}/rts`, { body: {} }); render(); }),
+    'sku-save': () => busy(b, async () => { const sku = b.dataset.sku; await S.api('/api/lazada/sku', { body: { seller_sku: sku, price: $(`[data-sku-price="${CSS.escape(sku)}"]`).value, quantity: $(`[data-sku-qty="${CSS.escape(sku)}"]`).value } }); S.toast({ type: 'success', title: `SKU ${sku} diperbarui`, ms: 3000 }); }),
+    'ad-auto': () => busy(b, async () => { S.toast({ type: 'agent', title: 'Mira membuat proposal…', text: b.dataset.name, ms: 3000 }); await S.api('/api/ads/auto', { body: { product_name: b.dataset.name, sku: b.dataset.sku } }); if (page === 'iklan') render(); }),
+    'ad-top': () => busy(b, async () => { const s = await S.api('/api/stats?days=30&orders=1'); const p = s.top[0]; if (!p) throw new Error('Belum ada data penjualan'); S.toast({ type: 'agent', title: 'Mira membuat proposal…', text: p.name, ms: 3000 }); await S.api('/api/ads/auto', { body: { product_name: p.name } }); render(); }),
+    'ad-manual': () => adModal(b.dataset),
+    'ad-ok': () => busy(b, async () => { await S.api(`/api/ads/${id}/approve`, { body: {} }); render(); }),
+    'ad-no': () => busy(b, async () => { await S.api(`/api/ads/${id}/reject`, { body: {} }); render(); }),
+    'ad-fin': () => busy(b, async () => { await S.api(`/api/ads/${id}/finish`, { body: {} }); render(); }),
+    'inc-del': async () => { if (!confirm('Hapus pemasukan ini?')) return; await S.api('/api/income/' + id, { method: 'DELETE' }); render(); },
+    fire: async () => { if (!confirm('Keluarkan karyawan ini?')) return; try { await S.api('/api/fire', { body: { key: b.dataset.key } }); render(); } catch (err) { fail(err); } },
+    dismiss: () => busy(b, async () => { const r = await S.api('/api/dismiss', { body: {} }); S.toast({ type: 'success', title: `Rapat #${r.id} dibubarkan`, text: r.summary }); render(); }),
+    break: async () => { try { await S.api('/api/break', { body: { on: true } }); render(); } catch (err) { fail(err); } },
+    work: async () => { try { await S.api('/api/break', { body: { on: false } }); render(); } catch (err) { fail(err); } },
+    'rep-build': () => busy(b, async () => { const r = await S.api('/api/reports/build', { body: {} }); S.toast({ type: 'project', title: r.count ? `Laporan ${r.day} dibuat` : `Laporan ${r.day} sudah ada` }); repDay = r.day; render(); }),
+    'rep-ai': () => busy(b, async () => { await S.api(`/api/reports/${b.dataset.day}/ai`, { body: {} }); render(); }),
+    'lz-off': async () => { if (!confirm('Putuskan otorisasi toko Lazada? SWEET kembali ke mode demo.')) return; try { await S.api('/api/lazada/disconnect', { body: {} }); S.toast({ type: 'success', title: 'Otorisasi Lazada diputus' }); render(); } catch (err) { fail(err); } },
+    'lz-auth': async () => { try { const r = await S.api('/api/lazada/auth-url'); window.open(r.url, '_blank'); } catch (err) { fail(err); } },
+    'h-check': () => hermesCard(),
+    'h-start': () => busy(b, async () => { await S.api('/api/hermes/start', { body: {} }); await hermesCard(); }),
+    'h-stop': () => busy(b, async () => { await S.api('/api/hermes/stop', { body: {} }); await hermesCard(); }),
+    'ck-paste': () => busy(b, async () => { const t = $('#cpaste').value.trim(); if (!t) throw new Error('Tempel isi cookies dulu'); await uploadCookies(t); }),
+    'ck-del': async () => { if (!confirm('Hapus cookies Seller Center dari database?')) return; await S.api('/api/lazada/cookies', { method: 'DELETE' }); render(); },
+    'lz-sess': () => busy(b, async () => { const r = await S.api('/api/lazada/session'); S.toast({ type: r.ok ? 'success' : 'warn', title: 'Sesi Seller Center', text: r.reason }); render(); }),
+    'low-save': async () => { await S.api('/api/settings', { body: { low_stock: $('#lowStock').value } }); S.toast({ type: 'success', title: 'Tersimpan', ms: 2000 }); },
+    sound: () => { const v = !S.store.get('sound', true); S.store.set('sound', v); b.classList.toggle('on', v); if (v) S.chime('order'); },
+    'test-toast': () => { S.toast({ type: 'order', title: 'Checkout baru Rp150.000 (contoh)', text: '#123456789 • Budi\nKopi Arabika 250g x2', amount: 150000 }); setTimeout(() => S.toast({ type: 'resi', title: 'Resi dicetak #123456789', text: 'JNE JNE0123456789 • Budi\nDicetak oleh Dimas' }), 700); setTimeout(() => S.toast({ type: 'ad', title: 'Proposal iklan (contoh)', text: 'Kopi Arabika 250g • Budget Rp50.000', actions: [{ label: 'Terima', cls: 'green', fn: () => {} }, { label: 'Tolak', cls: 'ghost', fn: () => {} }] }), 1400); },
+    'u-role': () => busy(b, async () => { await S.api('/api/users/' + id, { body: { role: b.dataset.role } }); render(); }),
+    'u-dis': () => busy(b, async () => { await S.api('/api/users/' + id, { body: { disabled: b.dataset.dis === '1' } }); render(); }),
+    'u-del': async () => { if (!confirm('Hapus akun ini permanen?')) return; try { await S.api('/api/users/' + id, { method: 'DELETE' }); render(); } catch (err) { fail(err); } },
+    'chat-ai': () => busy(b, async () => { const r = await S.api(`/api/lazada/chats/${encodeURIComponent(chatSel)}/ai`, { body: { send: false } }); $('#chatAi').innerHTML = `<div class="box warm md" style="margin-top:10px">${S.md(r.answer)}</div>`; })
+  };
+  if (A[act]) A[act]();
+});
+
+function adModal(d = {}) {
+  const bg = document.createElement('div'); bg.className = 'modal-bg';
+  bg.innerHTML = `<form class="modal" id="fAd"><h3 style="margin:0 0 4px">Proposal iklan manual</h3><p class="muted" style="margin:0 0 6px">Proposal masuk ke daftar tunggu — tekan Terima untuk menjalankan.</p>
+    <label class="f">Produk</label><input name="product_name" value="${esc(d.name || '')}" required>
+    <div class="row"><div style="flex:1"><label class="f">SKU</label><input name="sku" value="${esc(d.sku || '')}"></div><div style="flex:1"><label class="f">Tipe</label><select name="type"><option value="sponsored">Sponsored (iklan berbayar)</option><option value="diskon">Diskon (harga promo)</option></select></div></div>
+    <div class="row"><div style="flex:1"><label class="f">Budget (Rp)</label><input name="budget" type="number" value="50000"></div><div style="flex:1"><label class="f">Harga promo (diskon)</label><input name="sale_price" type="number" value="${d.price ? Math.round(d.price * 0.85) : ''}"></div><div style="width:90px"><label class="f">Hari</label><input name="days" type="number" value="3"></div></div>
+    <label class="f">Teks iklan</label><textarea name="copy" required>${esc(d.name || 'Produk')} pilihan terbaik dari SWEET. Promo terbatas, checkout sekarang.</textarea>
+    <div class="row" style="margin-top:14px;justify-content:flex-end"><button type="button" class="btn ghost" id="adX">Batal</button><button class="btn">Buat proposal</button></div></form>`;
+  document.body.appendChild(bg);
+  bg.onclick = (e) => { if (e.target === bg) bg.remove(); };
+  $('#adX', bg).onclick = () => bg.remove();
+  $('#fAd', bg).onsubmit = async (e) => { e.preventDefault(); try { await S.api('/api/ads/propose', { body: Object.fromEntries(new FormData(e.target)) }); bg.remove(); if (page === 'iklan') render(); } catch (err) { fail(err); } };
+}
+
+// ================= Render & realtime =================
+let rendering = false, queued = false;
+async function render() {
+  if (rendering) { queued = true; return; }
+  rendering = true;
+  try { $('#main').innerHTML = await P[page](); if (P[page].after) await P[page].after(); }
+  catch (e) { $('#main').innerHTML = `<div class="card">${empty('Terjadi kendala: ' + esc(e.message))}</div>`; }
+  rendering = false; badges();
+  if (queued) { queued = false; render(); }
+}
+function route() { const h = location.hash.slice(1) || 'ringkasan'; page = P[h] ? h : 'ringkasan'; sidebar(); render(); $('#main').scrollTop = 0; }
+addEventListener('hashchange', route);
+(async () => { (await S.api('/api/agents')).forEach((a) => { AG[a.key] = a; }); try { S.user = (await S.api('/api/auth/me')).user; } catch (_) {} route(); })();
+
+const idleInput = () => !document.activeElement || !document.activeElement.closest('input,textarea,select');
+let t1;
+const soon = (pages) => { if (!pages.includes(page)) return; clearTimeout(t1); t1 = setTimeout(() => { if (idleInput() && !document.querySelector('details[open]')) render(); }, 800); };
+S.on('notify', (n) => {
+  badges();
+  const el = $('#live'); if (el) el.insertAdjacentHTML('afterbegin', feedRow(n));
+  if (n.type === 'resi' && n.data && n.data.printed) { const rl = $('#resiList'); if (rl) S.api('/api/resi?limit=30').then((r) => { rl.innerHTML = r.printed.map(resiRow).join(''); }); }
+  if (['order', 'money', 'resi'].includes(n.type)) { soon(['ringkasan', 'pesanan', 'pendapatan']); const k = $('#k-rev'); if (k && (n.type === 'money' || n.type === 'order')) { k.classList.remove('flash'); void k.offsetWidth; k.classList.add('flash'); } }
+  if (n.type === 'ad' || (n.type === 'success' && /Iklan/.test(n.title))) soon(['iklan', 'ringkasan']);
+  if (n.data?.report_day) { soon(['laporan']); }
+  if (n.type === 'project' || n.data?.project_id) soon(['proyek']);
+  if (n.data?.meeting_id || /Rapat/.test(n.title)) soon(['rapat']);
+  if (n.data?.command_id) soon(['perintah']);
+});
+S.on('agent', (d) => { if (AG[d.key]) { const hadFlag = AG[d.key].flag; Object.assign(AG[d.key], d); if (hadFlag !== d.flag) badges(); } soon(['agen']); });
+S.on('activity', (r) => { const l = $('#actList'); if (l && (!actAgent || actAgent === r.agent)) l.insertAdjacentHTML('afterbegin', actRow(r)); if (r.agent === 'sistem' && /Rapat/.test(r.text)) soon(['rapat']); });
+S.on('office', () => soon(['rapat']));
+</script>
+</body>
+</html>

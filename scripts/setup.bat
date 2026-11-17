@@ -1,0 +1,5 @@
+@echo off
+title SWEET AI Agent Office - Setup
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup.ps1"
+echo.
+pause

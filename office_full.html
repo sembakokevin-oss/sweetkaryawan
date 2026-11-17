@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Office — SWEET AI Agent Office</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/shared.css">
+<script type="importmap">{ "imports": { "three": "/vendor/three/build/three.module.js" } }</script>
+<style>
+  html,body{height:100%;overflow:hidden}
+  #stage{position:fixed;top:var(--nav);left:0;right:0;bottom:0}
+  #loading{position:fixed;inset:var(--nav) 0 0 0;display:grid;place-items:center;z-index:5;color:var(--mute);font:700 12px var(--mono);letter-spacing:3px}
+  #head{position:fixed;top:calc(var(--nav) + 12px);left:50%;transform:translateX(-50%);z-index:20;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:min(980px,96vw)}
+  #head h1{margin:0;font:700 12px var(--mono);letter-spacing:5px;color:var(--ink2);text-transform:uppercase;text-align:center}
+  #head h1 b{color:var(--accent3)}
+  .bar{display:flex;gap:8px;align-items:center;pointer-events:auto;flex-wrap:wrap;justify-content:center}
+  .glass{background:rgba(20,13,16,.86);border:1px solid var(--line2);box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+  .slider{display:flex;align-items:center;gap:4px;border-radius:99px;padding:4px}
+  .slider button{width:34px;height:34px;border-radius:50%;border:0;background:transparent;cursor:pointer;color:var(--ink2);display:grid;place-items:center}
+  .slider button:hover{background:rgba(255,255,255,.07)}
+  .slider .lbl{min-width:250px;text-align:center;font:700 12px var(--mono);letter-spacing:1px;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .slider .lbl small{display:block;font:600 10px 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:.3px;color:var(--mute)}
+  .dots{display:flex;gap:4px;pointer-events:auto}
+  .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--accent2);width:18px;border-radius:4px}
+  /* Panel jam & timelapse */
+  #clockbox{position:fixed;left:16px;top:calc(var(--nav) + 12px);z-index:21;border-radius:18px;padding:14px;width:250px}
+  #clockbox .row{display:flex;gap:12px;align-items:center}
+  #clockbox .t{font:800 26px var(--mono);letter-spacing:1px;line-height:1}
+  #clockbox .d{font:600 11px var(--mono);color:var(--mute);margin-top:4px}
+  #clockbox .ph{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+  #clockbox h5{margin:12px 0 6px;font:700 10px var(--mono);letter-spacing:2px;color:var(--mute)}
+  .seg{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .seg button{flex:1;border:0;background:none;padding:5px 0;border-radius:7px;font:700 11px var(--mono);cursor:pointer;color:var(--ink2)}
+  .seg button.on{background:var(--grad);color:#fff}
+  .jumps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  .jumps button{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:8px;padding:5px 0;font:700 10.5px var(--mono);color:var(--ink2);cursor:pointer}
+  .jumps button:hover{border-color:var(--accent2);color:#fff}
+  .sched[hidden]{display:none}
+  .sched{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:11px;color:var(--mute);margin-top:6px}
+  .sched b{font-family:var(--mono);color:var(--ink2)}
+  .sched .on{color:var(--accent3)}
+  #banner{position:fixed;top:calc(var(--nav) + 118px);left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;z-index:21;background:var(--grad);color:#fff;padding:9px 16px;border-radius:12px;font-weight:700;box-shadow:var(--shadow2);transition:.4s cubic-bezier(.2,.9,.3,1.2);pointer-events:none;max-width:92vw;text-align:center}
+  #banner.on{opacity:1;transform:translateX(-50%)}
+  #feed{position:fixed;left:16px;bottom:16px;z-index:20;width:min(360px,calc(100vw - 32px));display:flex;flex-direction:column;gap:6px;pointer-events:none}
+  #feed .f{background:rgba(20,13,16,.9);border:1px solid var(--line);border-radius:12px;padding:7px 11px;font-size:12px;display:flex;gap:8px;align-items:center;animation:feedIn .5s cubic-bezier(.2,.9,.3,1.2)}
+  #feed .f b{white-space:nowrap;color:var(--accent3)}#feed .f span{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #feed .f.old{opacity:.5}
+  @keyframes feedIn{from{opacity:0;transform:translateX(-30px)}}
+  #stats{position:fixed;right:16px;bottom:16px;z-index:20;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:62vw}
+  .st{border-radius:12px;padding:8px 12px;min-width:100px}
+  .st b{display:block;font-size:16px;font-family:var(--mono)}.st span{font-size:10px;color:var(--mute);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .st.money b{color:var(--gold)}
+  .st.money.flash{animation:flashGold 1.4s}
+  @keyframes flashGold{0%{box-shadow:0 0 0 0 rgba(214,178,110,.7)}100%{box-shadow:0 0 0 18px rgba(214,178,110,0)}}
+  #legend{position:fixed;right:16px;bottom:84px;z-index:20;border-radius:12px;padding:8px 12px;font-size:11.5px;color:var(--ink2);display:flex;gap:14px}
+  #legend span{display:flex;gap:6px;align-items:center}
+  #legend i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:900 11px var(--mono);font-style:normal}
+  #legend .d{background:#d6a73c;color:#4a3205}#legend .u{background:#e2364b;color:#fff}#legend .p{background:#e5e7eb;color:#222}
+  #panel{position:fixed;top:calc(var(--nav) + 12px);right:12px;bottom:12px;width:min(390px,calc(100vw - 24px));z-index:30;background:linear-gradient(180deg,#1c1317,#130d10);border:1px solid var(--line2);border-radius:18px;box-shadow:var(--shadow2);
+    transform:translateX(calc(100% + 30px));transition:transform .45s cubic-bezier(.2,.9,.3,1);display:flex;flex-direction:column;overflow:hidden}
+  #panel.open{transform:none}
+  #panel .top{padding:18px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 30%,transparent),transparent)}
+  #panel h3{margin:0;font-size:18px}#panel .role{color:var(--ink2);font-weight:700;font-size:12.5px}
+  #panel .x{margin-left:auto;align-self:flex-start}
+  #panel .body{padding:16px 18px;overflow:auto;flex:1}
+  .stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+  .stat3 div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}.stat3 b{display:block;font-size:17px;font-family:var(--mono)}.stat3 span{font-size:10.5px;color:var(--mute);font-weight:700}
+  .now small{font:700 10px var(--mono);letter-spacing:1.5px;color:var(--mute)}
+  .tl{list-style:none;margin:0;padding:0}
+  .tl li{position:relative;padding:0 0 12px 18px;font-size:12.5px;border-left:2px solid var(--line2);margin-left:5px}
+  .tl li::before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--c,#555);border:2px solid #150e11}
+  .tl li small{display:block;color:var(--mute);font-size:11px}
+  h4{margin:16px 0 8px;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mute)}
+  .ask{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+  .help{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:19;font-size:11px;color:var(--mute);background:rgba(20,13,16,.8);padding:4px 12px;border-radius:99px;border:1px solid var(--line)}
+  #toasts{top:calc(var(--nav) + 128px)}
+  /* ---------- EXPLORE NOW ---------- */
+  .btn.explore{background:linear-gradient(135deg,#f0cf86,#b8892f);color:#1b130a;box-shadow:0 0 0 0 rgba(240,207,134,.6);animation:xPulse 2.2s infinite;font-weight:800;letter-spacing:.6px}
+  @keyframes xPulse{0%{box-shadow:0 0 0 0 rgba(240,207,134,.55)}70%{box-shadow:0 0 0 12px rgba(240,207,134,0)}100%{box-shadow:0 0 0 0 rgba(240,207,134,0)}}
+  .xmodal{position:fixed;inset:0;z-index:60;background:rgba(6,3,5,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+  .xmodal.on{display:flex;animation:xIn .3s ease}
+  @keyframes xIn{from{opacity:0}}
+  .xbox{width:min(860px,100%);max-height:calc(100vh - 32px);overflow:auto;background:linear-gradient(180deg,#1f151a,#120c0f);border:1px solid rgba(214,178,110,.35);border-radius:20px;box-shadow:var(--shadow2);padding:24px;position:relative}
+  .xbox h2{margin:0 0 4px;font:800 20px var(--mono);letter-spacing:3px;text-align:center;color:#f0d9a5}
+  .xbox .sub{text-align:center;color:var(--ink2);font-size:13px;margin-bottom:18px}
+  .xclose{position:absolute;right:14px;top:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--ink);font-size:20px;cursor:pointer;line-height:1}
+  .xmodes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .xmode{border:1px solid var(--line2);border-radius:14px;padding:14px;background:rgba(255,255,255,.03);cursor:pointer;text-align:left;color:var(--ink);transition:.2s}
+  .xmode:hover{border-color:#d6b26e;background:rgba(214,178,110,.08);transform:translateY(-2px)}
+  .xmode b{display:flex;gap:7px;align-items:center;font-size:14px;margin:8px 0 4px}.xmode span{font-size:11.5px;color:var(--mute);line-height:1.45;display:block}
+  .xmode .ic{color:#f0cf86}
+  .xwalk{margin-top:14px;width:100%;padding:16px;border-radius:14px;border:0;cursor:pointer;background:linear-gradient(135deg,#a52a4a,#5e1528);color:#fff;font:800 15px 'Plus Jakarta Sans',sans-serif;letter-spacing:1px;display:flex;gap:10px;align-items:center;justify-content:center}
+  .xwalk:hover{filter:brightness(1.15)}
+  .xchars{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .xchar{border:1px solid var(--line2);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.02);display:flex;flex-direction:column}
+  .xchar canvas{width:100%;height:260px;display:block;background:radial-gradient(circle at 50% 70%,rgba(214,178,110,.18),transparent 65%)}
+  .xchar .in{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .xchar h3{margin:0;font-size:18px}.xchar p{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.5;flex:1}
+  .xchar button{margin-top:8px;padding:11px;border-radius:11px;border:0;font:800 12.5px 'Plus Jakarta Sans',sans-serif;letter-spacing:1px;cursor:pointer;color:#fff}
+  .xname label{display:flex;gap:7px;align-items:center;font:800 11px var(--mono);letter-spacing:1px;color:#f0d9a5;margin:14px 0 6px}
+  .xname input{font:700 16px 'Plus Jakarta Sans',sans-serif;padding:12px 14px}
+  .xname .hint{font-size:12px;color:var(--mute);margin-top:6px}
+  .xname .row2{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+  .xname .picked{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:4px;font-size:13px;color:var(--ink2)}
+  .xname .picked b{color:#fff}
+  body.exploring #head .bar,body.exploring #dots,body.exploring #clockbox,body.exploring #stats,body.exploring #legend,body.exploring #feed,body.exploring .help,body.exploring #banner{display:none!important}
+  #xHud{position:fixed;top:calc(var(--nav) + 12px);left:50%;transform:translateX(-50%);z-index:40;display:none;flex-direction:column;align-items:center;gap:8px;width:min(720px,94vw)}
+  body.exploring #xHud{display:flex}
+  .xbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;border-radius:99px;padding:6px 8px 6px 14px}
+  .xbar .t{font:800 12px var(--mono);letter-spacing:1.5px;color:#f0d9a5}
+  .xcap{text-align:center;border-radius:14px;padding:10px 16px;min-width:280px}
+  .xcap b{display:block;font-size:15px}.xcap span{font-size:12px;color:var(--ink2)}
+  .xprog{height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:8px}.xprog i{display:block;height:100%;background:linear-gradient(90deg,#d6b26e,#f0cf86);width:0}
+  #xHelp{position:fixed;left:16px;bottom:16px;z-index:40;display:none;border-radius:14px;padding:12px 14px;font-size:12px;color:var(--ink2);max-width:min(380px,calc(100vw - 32px))}
+  body.exploring #xHelp{display:block}
+  #xHelp div{display:flex;gap:8px;align-items:center;padding:3px 0}#xHelp .ic{color:#f0cf86;flex:none}
+  #xHelp kbd{font:700 10.5px var(--mono);background:rgba(255,255,255,.08);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;color:#fff}
+  #xBrand{position:fixed;right:16px;bottom:16px;z-index:40;display:none;border-radius:14px;padding:10px 12px;font-size:11.5px;color:var(--ink2);text-align:right}
+  body.exploring #xBrand{display:block}
+  #xBrand .br{font:800 12px var(--mono);letter-spacing:2px;color:#fff}#xBrand .br em{font-style:normal;color:var(--accent3)}
+  #xBrand .ctl{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin:6px 0 4px}
+  #xBrand label{display:flex;gap:6px;align-items:center;cursor:pointer;font-weight:700}#xBrand input{width:auto}
+  #xBrand small{display:block;color:var(--mute);font-size:10.5px}
+  #xCross{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;z-index:39;display:none;pointer-events:none}
+  #xCross::before,#xCross::after{content:"";position:absolute;background:rgba(255,255,255,.75)}#xCross::before{left:10px;top:0;width:2px;height:22px}#xCross::after{top:10px;left:0;height:2px;width:22px}
+  #xChat{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:45;display:none;width:min(420px,90vw)}
+  #xChat.on{display:block}
+  @media (max-width:760px){.xmodes{grid-template-columns:1fr 1fr}.xchars{grid-template-columns:1fr}#xHelp{display:none!important}}
+
+  @media (max-width:1250px){#legend,.help{display:none}}
+  @media (max-width:900px){#stats{display:none}.slider .lbl{min-width:150px}#clockbox{top:auto;bottom:16px;left:auto;right:16px;width:210px}#clockbox .sched,#clockbox .jumps,#clockbox h5:last-of-type{display:none}#feed{display:none}}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div id="stage"></div>
+<div id="loading">MEMUAT KANTOR…</div>
+<div id="head">
+  <h1>Kantor AI · <b>SWEET</b> AI Agent Office</h1>
+  <div class="bar">
+    <div class="slider glass"><button id="prev" title="Sebelumnya (←)"></button><div class="lbl" id="vlabel">Seluruh kantor<small>Klik agen untuk melihat kerjaannya</small></div><button id="next" title="Berikutnya (→)"></button></div>
+    <button class="btn sm" id="bMeet"></button>
+    <button class="btn sm ghost glass" id="bBreak"></button>
+    <a class="btn sm ghost glass" href="/ruangan" id="bRoom"></a>
+    <button class="btn sm explore" id="bExplore"></button>
+  </div>
+  <div class="dots" id="dots"></div>
+</div>
+<div id="clockbox" class="glass">
+  <div class="row"><svg id="aclock" width="64" height="64" viewBox="0 0 100 100"></svg><div><div class="t" id="ct">--:--</div><div class="d" id="cd">—</div><div class="ph" id="cph">—</div></div></div>
+  <h5>TIMELAPSE</h5>
+  <div class="seg" id="speeds"></div>
+  <h5>LOMPAT KE JAM</h5>
+  <div class="jumps" id="jumps"></div>
+  <h5 id="schedT" style="cursor:pointer;display:flex;justify-content:space-between">JADWAL KANTOR <span id="schedA">+</span></h5>
+  <div class="sched" id="sched" hidden></div>
+</div>
+<div id="banner"></div>
+<div id="feed"></div>
+<div id="legend" class="glass"><span><i class="p">R</i>Print resi</span><span><i class="d">$</i>Promo habis</span><span><i class="u">!</i>Mendesak · meja berkedip</span><span><i class="b" style="background:#1f9d5c;color:#fff;border-radius:3px">F</i>Bendera Buy/Sell Limit (tambang)</span></div>
+<div id="stats"></div>
+<div class="help">Geser = pindah • Scroll = zoom • ← → = ganti ruangan • Klik agen = detail</div>
+<aside id="panel"></aside>
+
+<!-- ---------- EXPLORE NOW ---------- -->
+<div class="xmodal" id="xMenu"><div class="xbox">
+  <button class="xclose" data-x="close">×</button>
+  <h2>EXPLORE NOW</h2><div class="sub">Jelajahi kantor SWEET dan tambang emas — pilih mode kamera atau jalan-jalan sebagai karakter</div>
+  <div class="xmodes">
+    <button class="xmode" data-mode="free"><span class="ic" data-ic="move"></span><b>Camera Movement</b><span>Kamera bebas: WASD geser, tahan klik kanan untuk putar, scroll zoom.</span></button>
+    <button class="xmode" data-mode="poi"><span class="ic" data-ic="eye"></span><b>POI Camera</b><span>Lompat otomatis ke titik menarik: ruang Bos, meja agen, goa emas, meja Aurel.</span></button>
+    <button class="xmode" data-mode="drone"><span class="ic" data-ic="drone"></span><b>Drone FPV</b><span>Terbangkan drone sudut pandang orang pertama di atas kantor & tambang.</span></button>
+    <button class="xmode" data-mode="tour"><span class="ic" data-ic="clock"></span><b>TOUR 3 Menit</b><span>Tur sinematik otomatis keliling kompleks dengan keterangan setiap tempat.</span></button>
+  </div>
+  <button class="xwalk" data-x="chars"><span data-ic="walk"></span> JALAN-JALAN SEBAGAI KARAKTER (WASD)</button>
+</div></div>
+<div class="xmodal" id="xChar"><div class="xbox">
+  <button class="xclose" data-x="close">×</button>
+  <h2>PILIH KARAKTER ANDA</h2><div class="sub">Karakter ini yang akan berjalan di kantor dan terlihat oleh pengunjung lain</div>
+  <div class="xchars" id="xChars"></div>
+</div></div>
+<div class="xmodal" id="xName"><div class="xbox xname" style="width:min(520px,100%)">
+  <button class="xclose" data-x="close">×</button>
+  <h2>MASUKKAN NAMA ANDA</h2>
+  <div class="picked" id="xPicked"></div>
+  <label for="xNameIn"><span data-ic="tag"></span> NAMA PENGUNJUNG (CO-OP / MULTIPLAYER):</label>
+  <input id="xNameIn" maxlength="24" placeholder="Pengunjung" autocomplete="nickname">
+  <div class="hint" id="xNameHint">Wajib diisi sebelum lanjut. Nama ini akan tampil di atas kepala karakter Anda saat bertemu pengunjung lain.</div>
+  <div class="row2"><button class="btn ghost" data-x="back">‹ KEMBALI</button><button class="btn gold" id="xEnter">MASUK KANTOR ›</button></div>
+</div></div>
+<div id="xHud">
+  <div class="xbar glass"><span class="t" id="xTitle">EXPLORE</span><span class="tag" id="xOnline">0 pengunjung</span><span id="xCtl" style="display:flex;gap:6px"></span><button class="btn sm red" id="xExit">Keluar (ESC)</button></div>
+  <div class="xcap glass" id="xCap" style="display:none"><b id="xCapT"></b><span id="xCapS"></span><div class="xprog" id="xProg" style="display:none"><i id="xProgI"></i></div></div>
+</div>
+<div id="xHelp" class="glass"></div>
+<div id="xBrand" class="glass"><div class="br">SWEETOFFICE.COM · <em>AI</em> AGENT OFFICE</div>
+  <div class="ctl"><label><input type="checkbox" id="xHi"> Hi-Resolution Mode</label><button class="iconbtn" id="xSnd" title="Suara"></button></div>
+  <small>SFX pukulan: disintesis langsung di browser (WebAudio)</small></div>
+<div id="xCross"></div>
+<form id="xChat"><input id="xChatIn" maxlength="120" placeholder="Ketik pesan lalu Enter (tampil di atas kepala karakter)…" autocomplete="off"></form>
+
+<script src="/shared.js"></script>
+<script type="module">
+import { createOffice } from '/js/office3d.js';
+import { preview, CHARACTERS } from '/js/chars.js';
+const S = window.SWEET;
+S.nav('office');
+const $ = (id) => document.getElementById(id);
+const I = S.icon;
+$('prev').innerHTML = I('play', 14).replace('<path', '<path transform="rotate(180 12 12)"'); $('next').innerHTML = I('play', 14);
+$('bRoom').innerHTML = `${I('door', 15)} Ruang Agen`;
+let office, viewIdx = 0, panelKey = null, views = [];
+
+try {
+  office = await createOffice($('stage'), {
+    onExplore: (ev) => window.__sweetExplore && window.__sweetExplore(ev),
+    onAgentClick: (key, data, kind) => openPanel(key, kind),
+    onEmptyClick: () => closePanel(),
+    onView: (v) => {
+      viewIdx = office ? office.views.indexOf(v) : 0;
+      $('vlabel').innerHTML = `${S.esc(v.label)}<small>${v.agent ? 'Klik agen / ruangan untuk detail' : v.id === 'all' ? 'Klik agen untuk melihat kerjaannya' : 'Ruang bersama'}</small>`;
+      renderDots();
+    }
+  });
+  $('loading').remove();
+} catch (e) {
+  $('loading').innerHTML = `Gagal memuat kantor 3D<br><small style="letter-spacing:0">${S.esc(e.message)}</small>`;
+  throw e;
+}
+views = office.views;
+function renderDots() { $('dots').innerHTML = views.map((v, i) => `<i class="${i === viewIdx ? 'on' : ''}" title="${S.esc(v.label)}" data-i="${i}"></i>`).join(''); }
+$('dots').onclick = (e) => { const i = e.target.dataset.i; if (i !== undefined) go(Number(i)); };
+function go(i) { viewIdx = (i + views.length) % views.length; office.focus(views[viewIdx].id); history.replaceState(null, '', '#' + views[viewIdx].id); }
+$('prev').onclick = () => go(viewIdx - 1);
+$('next').onclick = () => go(viewIdx + 1);
+addEventListener('keydown', (e) => { if (e.target.closest('input,textarea') || office.explore.mode) return; if (e.key === 'ArrowLeft') go(viewIdx - 1); if (e.key === 'ArrowRight') go(viewIdx + 1); if (e.key === 'Escape') closePanel(); });
+renderDots();
+if (location.hash) { const i = views.findIndex((v) => v.id === location.hash.slice(1)); if (i >= 0) go(i); }
+
+// ---------- Jam kantor & timelapse ----------
+const SCHED = [['04:00', 'Kantor buka — agen datang', 'datang'], ['05:00', 'Jam kerja dimulai', 'kerja'], ['12:00', 'Istirahat (Lounge)', 'istirahat'], ['13:00', 'Kembali bekerja', 'kerja'], ['19:00', 'Jam kerja habis — laporan', 'laporan'], ['19:30', 'Pulang ke Stay Home', 'pulang'], ['20:00', 'Kantor tutup sampai 04:00', 'malam']];
+const PH_ICON = { malam: 'moon', datang: 'users', kerja: 'office', istirahat: 'clock', laporan: 'file', pulang: 'home' };
+function drawAnalog() {
+  const ms = S.simNow(), w = new Date(ms + 7 * 3600e3);
+  const s = w.getUTCSeconds() + w.getUTCMilliseconds() / 1000, m = w.getUTCMinutes() + s / 60, h = (w.getUTCHours() % 12) + m / 60;
+  const hand = (deg, len, wd, col) => `<line x1="50" y1="50" x2="${50 + Math.sin(deg * Math.PI / 180) * len}" y2="${50 - Math.cos(deg * Math.PI / 180) * len}" stroke="${col}" stroke-width="${wd}" stroke-linecap="round"/>`;
+  let ticks = ''; for (let i = 0; i < 12; i++) { const a = i * 30 * Math.PI / 180; ticks += `<line x1="${50 + Math.sin(a) * 40}" y1="${50 - Math.cos(a) * 40}" x2="${50 + Math.sin(a) * 45}" y2="${50 - Math.cos(a) * 45}" stroke="rgba(255,255,255,.45)" stroke-width="${i % 3 ? 1.5 : 3}"/>`; }
+  $('aclock').innerHTML = `<circle cx="50" cy="50" r="47" fill="#140c10" stroke="url(#g)" stroke-width="3"/><defs><linearGradient id="g"><stop offset="0" stop-color="#c9446a"/><stop offset="1" stop-color="#7d1d36"/></linearGradient></defs>${ticks}${hand(h * 30, 24, 4.5, '#f4ede9')}${hand(m * 6, 34, 3, '#f4ede9')}${hand(s * 6, 38, 1.4, '#c9446a')}<circle cx="50" cy="50" r="3" fill="#c9446a"/>`;
+  $('ct').textContent = S.simTime(true);
+  const c = S.clk;
+  if (c) $('cd').textContent = `${new Date(S.simNow() + 7 * 3600e3).toISOString().slice(0, 10)} • ${c.speed === 1 ? 'waktu nyata' : 'timelapse ' + c.speed + 'x'}`;
+  requestAnimationFrame(drawAnalog);
+}
+drawAnalog();
+function renderClock(c) {
+  if (!c) return;
+  $('cph').innerHTML = `${I(PH_ICON[c.phase] || 'clock', 13)} ${S.esc(c.label)}`;
+  $('speeds').innerHTML = (c.speeds || [1, 60, 300, 900]).map((v) => `<button data-sp="${v}" class="${c.speed === v ? 'on' : ''}">${v === 1 ? 'REAL' : v + 'x'}</button>`).join('');
+  $('sched').innerHTML = SCHED.map(([t, l, p]) => `<b class="${c.phase === p || (p === 'malam' && c.phase === 'malam') ? 'on' : ''}">${t}</b><span class="${c.phase === p ? 'on' : ''}">${l}</span>`).join('');
+}
+$('schedT').onclick = () => { const h = $('sched').hidden = !$('sched').hidden; $('schedA').textContent = h ? '+' : '–'; };
+$('jumps').innerHTML = [['04:55', 'Pagi'], ['11:58', 'Siang'], ['18:58', 'Sore'], ['20:30', 'Malam']].map(([t, l]) => `<button data-j="${t}" title="Lompat ke ${t}">${l}</button>`).join('');
+$('speeds').onclick = async (e) => { const b = e.target.closest('[data-sp]'); if (!b) return; try { renderClock(await S.api('/api/clock', { body: { speed: Number(b.dataset.sp) } })); } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); } };
+$('jumps').onclick = async (e) => { const b = e.target.closest('[data-j]'); if (!b) return; try { renderClock(await S.api('/api/clock', { body: { jump: b.dataset.j } })); } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); } };
+S.on('clock', renderClock);
+renderClock(await S.api('/api/clock'));
+
+// ---------- Mode kantor ----------
+function renderMode(mode, meeting) {
+  $('bMeet').innerHTML = mode === 'rapat' ? `${I('x', 14)} Bubarkan rapat` : `${I('mic', 14)} Rapat`;
+  $('bMeet').className = 'btn sm ' + (mode === 'rapat' ? 'red' : 'accent');
+  $('bBreak').innerHTML = mode === 'istirahat' ? `${I('office', 14)} Kembali kerja` : `${I('clock', 14)} Istirahat`;
+  const b = $('banner');
+  if (mode === 'rapat' && meeting) {
+    const sp = meeting.speaker && office.agent(meeting.speaker);
+    b.innerHTML = `Rapat #${meeting.id}: ${S.esc(meeting.topic)}${sp ? ` • ${S.esc(sp.name)} melapor` : ''}`; b.classList.add('on');
+  } else if (mode === 'istirahat') { b.textContent = 'Jam istirahat — agen bersantai di Lounge'; b.classList.add('on'); }
+  else if (mode === 'pulang') { b.innerHTML = `${S.clk && S.clk.closed ? 'Kantor tutup 20:00–04:00 — tidak ada cetak resi & pesanan tidak diproses.' : 'Jam kerja selesai — agen pulang.'} Lihat mereka di <a href="/stayhome" style="color:#fff;text-decoration:underline;pointer-events:auto">Stay Home</a>`; b.classList.add('on'); }
+  else b.classList.remove('on');
+}
+S.on('office', (o) => renderMode(o.mode, o.meeting));
+S.on('health', (h) => renderMode(h.mode, h.meeting ? { ...h.meeting, speaker: null } : null));
+renderMode(office.mode, null);
+$('bMeet').onclick = async (e) => {
+  const btn = e.currentTarget; btn.disabled = true;
+  try {
+    if (office.mode === 'rapat') await S.api('/api/dismiss', { body: {} });
+    else { const topic = prompt('Topik rapat:', 'Koordinasi Rutin'); if (topic !== null) { await S.api('/api/meeting', { body: { topic } }); go(views.findIndex((v) => v.id === 'meeting')); } }
+  } catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); }
+  btn.disabled = false;
+};
+$('bBreak').onclick = async () => {
+  try { await S.api('/api/break', { body: { on: office.mode !== 'istirahat' } }); if (office.mode !== 'istirahat') go(views.findIndex((v) => v.id === 'lounge')); }
+  catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); }
+};
+
+// ---------- Feed aktivitas ----------
+const AG = {};
+(await S.api('/api/agents')).forEach((a) => { AG[a.key] = a; });
+AG.kevin = { name: 'Kevin' }; AG.sistem = { name: 'Sistem' };
+function feedItem(r) {
+  const a = AG[r.agent] || { name: r.agent };
+  const d = document.createElement('div'); d.className = 'f';
+  d.innerHTML = `<b>${S.esc(a.name)}</b><span>${S.esc(r.text)}</span>`;
+  const f = $('feed'); f.appendChild(d);
+  while (f.children.length > 5) f.firstChild.remove();
+  [...f.children].forEach((c, i) => c.classList.toggle('old', i < f.children.length - 3));
+}
+(await S.api('/api/activity?limit=4')).reverse().forEach(feedItem);
+S.on('activity', (r) => { feedItem(r); if (panelKey && r.agent === panelKey) loadPanel(panelKey); });
+
+// ---------- Statistik & nominal uang ----------
+async function stats(flash) {
+  try {
+    const [s, r] = await Promise.all([S.api('/api/stats?days=1&orders=1'), S.api('/api/resi?limit=1')]);
+    const k = s.kpi, ag = office.agents();
+    office.setRevenue(k.today_revenue, k.today_orders, k.today_buyers);
+    $('stats').innerHTML = [['money', 'Pendapatan hari ini', S.rp(k.today_revenue)], ['', 'Pesanan', k.today_orders], ['', 'Pembeli', k.today_buyers], ['', 'Resi dicetak', r.printed.length ? k.active_resi + ' aktif' : '0'], ['', 'Menunggu cetak', r.waiting], ['', 'Agen aktif', `${ag.filter((a) => a.busy || a.step).length}/${ag.length}`]]
+      .map(([c, a, b]) => `<div class="st glass ${c} ${flash && c ? 'flash' : ''}"><b>${b}</b><span>${a}</span></div>`).join('');
+  } catch (_) {}
+}
+stats(); setInterval(stats, 8000);
+S.on('notify', (n) => {
+  if (n.type === 'order') {
+    const m = String(n.title).match(/Rp\s?([\d.]+)/);
+    if (m) office.popMoney('+Rp' + m[1], 'dimas');
+    stats(true);
+  }
+  if (n.type === 'money' && /Lynk/.test(n.title)) { const m = n.title.match(/Rp\s?([\d.]+)/); if (m) office.popMoney('+Rp' + m[1], 'tomi'); stats(true); }
+  if (n.type === 'resi' && n.data && n.data.printed) stats();
+  if (n.data && n.data.trade && n.data.profit > 0) office.popMoney(`+${Number(n.data.profit).toFixed(2)} ${n.data.usd !== undefined && n.data.usd !== n.data.profit ? 'USC' : '$'}`, 'aurel');
+});
+
+// ---------- Panel agen ----------
+function closePanel() { $('panel').classList.remove('open'); panelKey = null; office.select(null); }
+let lastAnswer = '';
+async function openPanel(key, kind) {
+  if (panelKey !== key) lastAnswer = '';
+  panelKey = key; office.select(key);
+  if (kind === 'boss' || kind === 'npc') {
+    $('panel').style.setProperty('--ac', kind === 'boss' ? '#d6b26e' : '#6a8caf');
+    $('panel').innerHTML = `<div class="top">${S.avatar({ name: kind === 'boss' ? 'Kevin' : 'Juan', color: kind === 'boss' ? '#d6b26e' : '#6a8caf' }, 60)}<div><h3>${kind === 'boss' ? 'Kevin' : 'Juan'}</h3><div class="role">${kind === 'boss' ? 'Bos SWEET · Pemilik perusahaan' : 'Resepsionis'}</div></div><button class="btn sm ghost x" id="px">${I('x', 14)}</button></div>
+      <div class="body"><p>${kind === 'boss' ? 'Ruang Kevin ada di lantai atas. Beri perintah ke tim lewat <a href="/dashboard#perintah" style="color:var(--accent3);font-weight:700">Pusat Perintah</a> atau Telegram.' : 'Juan menyambut tamu dan berpatroli di lorong.'}</p></div>`;
+    $('px').onclick = closePanel;
+    $('panel').classList.add('open'); return;
+  }
+  $('panel').classList.add('open');
+  await loadPanel(key);
+  const room = office.views.find((v) => v.agent === key);
+  if (room && office.view.id === 'all') go(views.indexOf(room));
+}
+async function loadPanel(key) {
+  const d = await S.api('/api/agent/' + encodeURIComponent(key));
+  if (panelKey !== key) return;
+  const a = d.agent, live = office.agent(key) || a;
+  $('panel').style.setProperty('--ac', a.color || '#a52a4a');
+  const C = { kerja: '#5b8def', selesai: '#3fb37f', gagal: '#e2505f', tool: '#9b7bdb', rutin: '#d6b26e', resi: '#5b8def', promo: '#d6b26e', mendesak: '#e2505f' };
+  $('panel').innerHTML = `
+    <div class="top">${S.avatar(a, 64)}
+      <div><h3>${S.esc(a.name)}</h3><div class="role">${a.no ? `Agent #${a.no} · ` : ''}${S.esc(a.role)}</div>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${live.busy || live.step ? '<span class="tag running"><span class="dotlive"></span> Bekerja</span>' : '<span class="tag">Idle</span>'}${live.flag ? `<span class="tag ${live.flag === '!' ? 'failed' : 'pending'}">${live.flag === '!' ? 'Mendesak' : 'Promo habis'}</span>` : ''}</div></div>
+      <button class="btn sm ghost x" id="px">${I('x', 14)}</button></div>
+    <div class="body">
+      <div class="muted" style="font-size:12.5px">${S.esc(a.specialty)}</div>
+      <div class="stat3"><div><b>${d.stats.today}</b><span>Tugas hari ini</span></div><div><b>${d.stats.done}</b><span>Selesai</span></div><div><b>${d.stats.failed}</b><span>Gagal</span></div></div>
+      <div class="box now"><small>${live.busy ? 'SEDANG MENGERJAKAN' : live.step ? 'ALUR KERJA MEJA' : 'STATUS'}</small><div style="font-weight:700;margin-top:3px">${S.esc(live.busy ? live.current_task : live.step_label || live.thought)}</div>${live.flag ? `<div style="font-size:12px;margin-top:4px;color:${live.flag === '!' ? 'var(--red)' : 'var(--gold)'}">${S.esc(live.flag_note)}</div>` : ''}</div>
+      ${lastAnswer ? `<div class="box warm md" style="margin-top:12px">${S.md(lastAnswer)}</div>` : ''}
+      <h4>Tugas terbaru</h4>
+      <ul class="tl">${d.tasks.slice(0, 6).map((t) => `<li style="--c:${t.status === 'done' ? '#3fb37f' : t.status === 'running' ? '#5b8def' : '#e2505f'}">${S.esc(t.title)}<small>${S.timeAgo(t.ts)} · ${t.source || ''} · ${t.status}</small></li>`).join('') || '<li>Belum ada tugas</li>'}</ul>
+      <h4>Aktivitas</h4>
+      <ul class="tl">${d.activity.slice(0, 8).map((x) => `<li style="--c:${C[x.kind] || '#6b5f63'}">${S.esc(x.text)}<small>${S.timeAgo(x.ts)} · ${x.kind}</small></li>`).join('') || '<li>Belum ada aktivitas</li>'}</ul>
+      <a class="btn sm ghost" href="/ruangan#${a.key}" style="margin-top:6px">${I('door', 14)} Buka ruangan ${S.esc(a.name)}</a>
+    </div>
+    <form class="ask" id="ask"><input id="q" placeholder="Beri tugas ke ${S.esc(a.name)}…" autocomplete="off"><button class="btn accent">Kirim</button></form>`;
+  $('px').onclick = closePanel;
+  $('ask').onsubmit = async (e) => {
+    e.preventDefault(); const q = $('q').value.trim(); if (!q) return;
+    const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Bekerja…';
+    try { const r = await S.api('/api/agent/task', { body: { key: a.key, text: q } }); lastAnswer = r.answer; S.toast({ type: 'agent', title: `${a.name} selesai`, text: r.answer.slice(0, 200) }); }
+    catch (err) { S.toast({ type: 'warn', title: 'Gagal', text: err.message }); }
+    loadPanel(a.key);
+  };
+}
+let pt;
+S.on('agent', (d) => { if (d.key === panelKey && !document.activeElement?.closest('#ask')) { clearTimeout(pt); pt = setTimeout(() => loadPanel(panelKey), 300); } });
+
+// =====================================================================
+// ---------- EXPLORE NOW: menu, pilih karakter, nama, HUD, multiplayer ----------
+// =====================================================================
+const XE = office.explore;
+const store = { get: (k, d) => { try { const v = localStorage.getItem('sweet_x_' + k); return v === null ? d : JSON.parse(v); } catch (_) { return d; } }, set: (k, v) => { try { localStorage.setItem('sweet_x_' + k, JSON.stringify(v)); } catch (_) {} } };
+let CID = null; try { CID = sessionStorage.getItem('sweet_cid'); } catch (_) {}
+if (!CID) { CID = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); try { sessionStorage.setItem('sweet_cid', CID); } catch (_) {} }
+document.querySelectorAll('[data-ic]').forEach((e) => { e.innerHTML = I(e.dataset.ic, e.closest('.xwalk') ? 18 : 15); });
+$('bExplore').innerHTML = `${I('walk', 15)} EXPLORE NOW`;
+const openM = (id) => { document.querySelectorAll('.xmodal').forEach((m) => m.classList.toggle('on', m.id === id)); };
+const closeM = () => { document.querySelectorAll('.xmodal').forEach((m) => m.classList.remove('on')); stopPreviews(); };
+$('bExplore').onclick = () => openM('xMenu');
+document.querySelectorAll('.xmodal').forEach((m) => m.addEventListener('click', (e) => {
+  if (e.target === m) closeM();
+  const x = e.target.closest('[data-x]'); if (!x) return;
+  if (x.dataset.x === 'close') closeM();
+  if (x.dataset.x === 'chars') showChars();
+  if (x.dataset.x === 'back') showChars();
+}));
+document.querySelectorAll('.xmode').forEach((b) => b.onclick = () => { closeM(); startMode(b.dataset.mode); });
+
+let previews = [], picked = store.get('char', 'kama');
+function stopPreviews() { previews.forEach((p) => p.stop()); previews = []; }
+function showChars() {
+  openM('xChar'); stopPreviews();
+  const cols = { kama: 'linear-gradient(135deg,#ff6fae,#c2407f)', garuda: 'linear-gradient(135deg,#d6b26e,#7a5a14)' };
+  $('xChars').innerHTML = Object.values(CHARACTERS).map((c) => `<div class="xchar"><canvas data-k="${c.key}"></canvas><div class="in"><h3>${S.esc(c.name)}</h3><p>${S.esc(c.desc)}</p><button data-pick="${c.key}" style="background:${cols[c.key]}">PILIH ${S.esc(c.name.toUpperCase())}</button></div></div>`).join('');
+  $('xChars').querySelectorAll('canvas').forEach((cv) => previews.push(preview(cv, cv.dataset.k)));
+  $('xChars').onclick = (e) => { const b = e.target.closest('[data-pick]'); if (!b) return; picked = b.dataset.pick; store.set('char', picked); showName(); };
+}
+function showName() {
+  stopPreviews(); openM('xName');
+  $('xPicked').innerHTML = `Karakter dipilih: <b>${S.esc(CHARACTERS[picked].name)}</b>`;
+  const inp = $('xNameIn'); inp.value = store.get('name', '') || (S.user && S.user.name) || 'Pengunjung'; setTimeout(() => { inp.focus(); inp.select(); }, 50);
+  $('xNameHint').style.color = '';
+}
+$('xEnter').onclick = () => {
+  const name = $('xNameIn').value.replace(/[<>&"'`]/g, '').trim().slice(0, 24);
+  if (!name) { $('xNameHint').style.color = 'var(--red)'; $('xNameIn').focus(); return; }
+  store.set('name', name); closeM(); startMode('player', { char: picked, name });
+};
+$('xNameIn').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('xEnter').click(); });
+
+const HELP = {
+  common: [['mouse', 'Tahan <kbd>klik kanan</kbd> mouse untuk rotate kamera'], ['mouse', 'Scroll mouse untuk zoom in/out'], ['keyboard', '<kbd>ESC</kbd> untuk menampilkan mouse / keluar']],
+  player: [['keyboard', '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> jalan · <kbd>Shift</kbd> lari · <kbd>Space</kbd> lompat'], ['mouse', '<kbd>Klik kanan</kbd> sekali untuk menggerakkan karakter ke titik itu'], ['keyboard', '<kbd>F</kbd> pukul · <kbd>E</kbd> lihat kerjaan agen terdekat · <kbd>Enter</kbd> chat']],
+  free: [['keyboard', '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> geser kamera · <kbd>Q</kbd>/<kbd>E</kbd> putar · <kbd>R</kbd>/<kbd>F</kbd> sudut · <kbd>Shift</kbd> cepat']],
+  poi: [['eye', 'Kamera pindah otomatis tiap 9 detik · tombol ‹ › untuk pindah manual']],
+  drone: [['mouse', '<kbd>Klik</kbd> layar untuk kendali mouse (lihat sekeliling)'], ['keyboard', '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> terbang · <kbd>Space</kbd>/<kbd>E</kbd> naik · <kbd>Q</kbd>/<kbd>C</kbd> turun · <kbd>Shift</kbd> boost · scroll = kecepatan']],
+  tour: [['clock', 'Tur otomatis 3 menit — duduk santai, kamera bergerak sendiri']]
+};
+const TITLE = { free: 'CAMERA MOVEMENT', poi: 'POI CAMERA', drone: 'DRONE FPV', tour: 'TOUR 3 MENIT', player: 'JALAN-JALAN' };
+let hudTimer = null;
+function startMode(mode, o) { closePanel(); XE.start(mode, o); }
+function renderHud(mode) {
+  document.body.classList.toggle('exploring', !!mode);
+  clearInterval(hudTimer); $('xCap').style.display = 'none'; $('xProg').style.display = 'none'; $('xCross').style.display = 'none'; $('xChat').classList.remove('on');
+  if (!mode) { sendLeave(); return; }
+  $('xTitle').textContent = TITLE[mode] || 'EXPLORE';
+  $('xHelp').innerHTML = [...(HELP[mode] || []), ...HELP.common.filter((h, i) => !(mode === 'drone' && i === 0))].map(([ic, t]) => `<div>${I(ic, 14)}<span>${t}</span></div>`).join('');
+  const ctl = $('xCtl');
+  ctl.innerHTML = mode === 'poi' ? `<button class="btn sm ghost" id="xPrev">‹</button><button class="btn sm ghost" id="xAuto"></button><button class="btn sm ghost" id="xNext">›</button>`
+    : `<button class="btn sm ghost" id="xSwitch">${I('move', 13)} Ganti mode</button>`;
+  if (mode === 'poi') { $('xPrev').onclick = XE.poiPrev; $('xNext').onclick = XE.poiNext; const sa = () => { $('xAuto').textContent = XE.poiAutoOn ? 'Auto: ON' : 'Auto: OFF'; }; sa(); $('xAuto').onclick = () => { XE.poiAuto(!XE.poiAutoOn); sa(); }; }
+  else $('xSwitch').onclick = () => openM('xMenu');
+  if (mode === 'tour') { $('xCap').style.display = ''; $('xProg').style.display = ''; hudTimer = setInterval(() => { const ti = XE.tourInfo(); if (!ti) return; $('xProgI').style.width = (ti.elapsed / ti.total * 100).toFixed(1) + '%'; const left = Math.max(0, ti.total - ti.elapsed); $('xTitle').textContent = `TOUR 3 MENIT · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`; }, 250); }
+  if (mode === 'drone') { $('xCap').style.display = ''; hudTimer = setInterval(() => { const d = XE.droneInfo(); if (!d) return; $('xCapT').textContent = `ALT ${d.alt.toFixed(1)} m · ${(d.speed * 3.6).toFixed(0)} km/j · max ${(d.max * 3.6).toFixed(0)} km/j`; $('xCapS').textContent = d.locked ? 'Kendali mouse aktif · ESC untuk menampilkan mouse' : 'Klik layar untuk mengendalikan arah pandang'; $('xCross').style.display = d.locked ? 'block' : 'none'; }, 150); }
+}
+$('xExit').onclick = () => XE.exit();
+function onExplore(ev) {
+  if (ev.type === 'mode') renderHud(ev.mode);
+  if (ev.type === 'poi' || ev.type === 'tour') { $('xCap').style.display = ''; $('xCapT').textContent = ev.label; $('xCapS').textContent = `${ev.sub || ''}  (${ev.i + 1}/${ev.n})`; }
+  if (ev.type === 'tour-end') S.toast({ type: 'info', title: 'Tour selesai', text: 'Sekarang mode Camera Movement — jelajahi sendiri.' });
+  if (ev.type === 'hit') { lastSay = ''; }
+}
+// hubungkan callback explore (office dibuat sebelum blok ini)
+window.__sweetExplore = onExplore;
+
+// Hi-Res & suara
+$('xHi').checked = !!store.get('hires', false); if ($('xHi').checked) XE.setHiRes(true);
+$('xHi').onchange = () => { store.set('hires', $('xHi').checked); XE.setHiRes($('xHi').checked); };
+const sndIcon = () => { $('xSnd').innerHTML = I(S.store.get('sound', true) ? 'sound' : 'mute', 16); };
+sndIcon(); $('xSnd').onclick = () => { S.store.set('sound', !S.store.get('sound', true)); sndIcon(); };
+
+// Chat (Enter)
+addEventListener('keydown', (e) => {
+  if (XE.mode !== 'player') return;
+  if (e.key === 'Enter' && document.activeElement !== $('xChatIn')) { e.preventDefault(); $('xChat').classList.add('on'); $('xChatIn').focus(); }
+});
+$('xChat').onsubmit = (e) => { e.preventDefault(); const t = $('xChatIn').value.trim(); if (t) XE.say(t); $('xChatIn').value = ''; $('xChat').classList.remove('on'); $('xChatIn').blur(); };
+$('xChatIn').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); $('xChat').classList.remove('on'); $('xChatIn').blur(); } });
+
+// Multiplayer: kirim posisi & terima pengunjung lain
+let lastSent = '', lastSentAt = 0, lastSay = '';
+async function sendState() {
+  const st = XE.playerState(); if (!st) return;
+  const k = JSON.stringify(st);
+  if (k === lastSent && Date.now() - lastSentAt < 2500) return;
+  lastSent = k; lastSentAt = Date.now();
+  try { const r = await S.api('/api/explore/state', { body: { cid: CID, ...st } }); if (r && r.online !== undefined) $('xOnline').textContent = `${r.online} pengunjung online`; } catch (_) {}
+}
+setInterval(sendState, 160);
+function sendLeave() { try { navigator.sendBeacon('/api/explore/leave', new Blob([JSON.stringify({ cid: CID })], { type: 'application/json' })); } catch (_) {} lastSent = ''; }
+addEventListener('pagehide', sendLeave);
+const applyPlayers = (d) => { const n = XE.updateVisitors(d.list || [], CID); const total = (d.list || []).length; $('xOnline').textContent = `${total} pengunjung online`; };
+S.on('players', applyPlayers);
+S.api('/api/explore/players').then(applyPlayers).catch(() => {});
+if (location.hash === '#explore') openM('xMenu');
+</script>
+</body>
+</html>
